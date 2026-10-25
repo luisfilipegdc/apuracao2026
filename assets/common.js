@@ -4,7 +4,7 @@ window.EB = (() => {
   const CARGOS = {1:'Presidente',3:'Governador',5:'Senador',6:'Deputado federal',7:'Deputado estadual',8:'Deputado distrital',11:'Prefeito',13:'Vereador'};
   const ORD = [1,3,5,6,7,8,11,13];
   // Apuração ao vivo: a home só destaca o placar dentro desta janela.
-  const LIVE = {ate: new Date('2026-10-27T23:59:00-03:00'), base:'https://resultados.tse.jus.br/oficial/ele2026', fed:'6258', titulo:'2º turno 2026'};
+  const LIVE = {ate: new Date('2026-10-27T23:59:00-03:00'), base:'/tse/ele2026', fed:'6258', titulo:'2º turno 2026'};
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const fmt = x => Math.round(+x || 0).toLocaleString('pt-BR');
   const pc = (x, d = 1) => (isFinite(x) ? +x : 0).toLocaleString('pt-BR', {minimumFractionDigits:d, maximumFractionDigits:d}) + '%';

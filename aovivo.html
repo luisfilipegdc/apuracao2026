@@ -124,7 +124,7 @@
 (()=>{
 // Configuração da eleição ao vivo. Para a próxima eleição, troque o ciclo e os códigos publicados pelo TSE em
 // https://www.tse.jus.br/eleicoes/informacoes-tecnicas-sobre-a-divulgacao-de-resultados
-const BASE='https://resultados.tse.jus.br/oficial/ele2026';
+const BASE='/tse/ele2026';
 const FED='6258', EST='6260', T1E='6257';
 const pad=e=>String(e).padStart(6,'0');
 const UFS={ac:'Acre',al:'Alagoas',am:'Amazonas',ap:'Amapá',ba:'Bahia',ce:'Ceará',df:'Distrito Federal',es:'Espírito Santo',go:'Goiás',ma:'Maranhão',mg:'Minas Gerais',ms:'Mato Grosso do Sul',mt:'Mato Grosso',pa:'Pará',pb:'Paraíba',pe:'Pernambuco',pi:'Piauí',pr:'Paraná',rj:'Rio de Janeiro',rn:'Rio Grande do Norte',ro:'Rondônia',rr:'Roraima',rs:'Rio Grande do Sul',sc:'Santa Catarina',se:'Sergipe',sp:'São Paulo',to:'Tocantins',zz:'Exterior'};
@@ -153,15 +153,20 @@ addEventListener('hashchange',()=>{showTab();scrollTo(0,0);});
 showTab();
 
 /* fila: até 3 requisições simultâneas, para não levar 429 do TSE */
-const Q=[];let active=0;const MAXC=3,GAP=150;
+const Q=[];let active=0;const MAXC=6,GAP=60;
 const slot=()=>new Promise(r=>{Q.push(r);pump();});
 function pump(){while(active<MAXC&&Q.length){active++;Q.shift()();}}
 function release(){setTimeout(()=>{active--;pump();},GAP);}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Primeiro pelo atalho do próprio site (/tse, com cache na Vercel); se falhar, direto no TSE.
+const DIRECT=BASE.replace('/tse/','https://resultados.tse.jus.br/oficial/');
+let viaProxy=true;
 async function get(path,tries=4){
   for(let i=0;i<tries;i++){
     await slot(); let r;
-    try{r=await fetch(BASE+path,{cache:'no-cache'});}finally{release();}
+    const url=(viaProxy?BASE:DIRECT)+path;
+    try{r=await fetch(url,{cache:'no-cache'});}catch(e){r=null;}finally{release();}
+    if(!r||(viaProxy&&r.status>=500)){if(viaProxy){viaProxy=false;continue;}await sleep(2000*2**i);continue;}
     if(r.status===429||r.status>=500){await sleep(2000*2**i+Math.random()*800);continue;}
     if(!r.ok) throw new Error('o TSE respondeu '+r.status);
     return r.json();
