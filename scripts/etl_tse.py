@@ -101,6 +101,8 @@ def processar_ano(ano):
     cand = defaultdict(dict)
     mun = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
     nomes_mun = {}
+    uf_mun = {}
+    pmun = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))  # votos por partido em cada município, todos os cargos
     tipo_eleicao = {}
     for idx, r in linhas(zc):
         cargo = num(r[idx["CD_CARGO"]])
@@ -131,6 +133,8 @@ def processar_ano(ano):
         c["v"] += v
         if cargo in POR_MUNICIPIO:
             mun[k][cdm][sq] += v
+        pmun[(turno, cargo, uf)][cdm][r[idx["SG_PARTIDO"]]] += v
+        uf_mun[cdm] = uf
         tipo_eleicao[(turno, cargo)] = True
 
     # detalhe: comparecimento etc. por (turno, cargo, uf, municipio)
@@ -206,10 +210,49 @@ def processar_ano(ano):
             json.dump(doc, f, ensure_ascii=False, separators=(",", ":"))
         resumo[f"t{turno}"]["c1"].append("br")
 
+    escrever_municipios(ano, cand, mun, pmun, det, nomes_mun, uf_mun, fonte)
+
     for p in (zc, zd):
         if p and os.environ.get("ETL_KEEP_ZIP") != "1":
             os.remove(p)
     return {t: {c: sorted(u) for c, u in cs.items()} for t, cs in resumo.items()}
+
+
+TOP = {1: 6, 3: 6, 5: 6, 11: 6, 13: 15}
+
+
+def escrever_municipios(ano, cand, mun, pmun, det, nomes_mun, uf_mun, fonte):
+    """Um arquivo por município com todas as eleições dele: data/mun/<uf>/<cd>.json.
+    Cada ano reprocessado substitui só as chaves daquele ano."""
+    por_mun = defaultdict(dict)
+    for (turno, cargo, uf), ms in pmun.items():
+        for cdm, partidos in ms.items():
+            chave = f"{ano}-t{turno}-c{cargo}"
+            e = {"partidos": dict(sorted(partidos.items(), key=lambda kv: -kv[1])),
+                 "det": det[(turno, cargo, uf)].get(cdm, [0] * 5)}
+            if cargo in POR_MUNICIPIO:
+                cs = cand[(turno, cargo, uf)]
+                votos = sorted(mun[(turno, cargo, uf)][cdm].items(), key=lambda kv: -kv[1])[:TOP[cargo]]
+                e["cands"] = [{"n": cs[sq]["n"], "nm": cs[sq]["nm"], "p": cs[sq]["p"], "sit": cs[sq]["sit"], "v": v} for sq, v in votos if v]
+            por_mun[cdm][chave] = e
+    base = os.path.join(OUT, "mun")
+    idx_path = os.path.join(base, "index.json")
+    indice = json.load(open(idx_path, encoding="utf-8")) if os.path.exists(idx_path) else {}
+    for cdm, eleicoes in por_mun.items():
+        uf = uf_mun[cdm]
+        caminho = os.path.join(base, uf)
+        os.makedirs(caminho, exist_ok=True)
+        arq = os.path.join(caminho, f"{cdm}.json")
+        doc = json.load(open(arq, encoding="utf-8")) if os.path.exists(arq) else {"cd": cdm, "uf": uf, "eleicoes": {}}
+        doc["nm"] = nomes_mun.get(cdm, cdm)
+        doc["eleicoes"] = {k: v for k, v in doc["eleicoes"].items() if not k.startswith(f"{ano}-")}
+        doc["eleicoes"].update(eleicoes)
+        doc.setdefault("fontes", {})[str(ano)] = fonte
+        with open(arq, "w", encoding="utf-8") as f:
+            json.dump(doc, f, ensure_ascii=False, separators=(",", ":"))
+        indice[cdm] = [doc["nm"], uf]
+    with open(idx_path, "w", encoding="utf-8") as f:
+        json.dump(indice, f, ensure_ascii=False, separators=(",", ":"))
 
 
 def main():
