@@ -22,10 +22,9 @@
 
 <nav class="nav" aria-label="Seções">
   <div class="nav-in">
-    <a href="./#presidente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h5"/><path d="m9 16 2 2 4-4"/></svg>Presidente</a>
-    <a href="./#estados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Estados</a>
-    <a href="./#governadores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>Governos</a>
-    <a href="historico.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Histórico</a>
+    <a href="./" data-nav="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>Início</a>
+    <a href="aovivo.html" data-nav="aovivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h5"/><path d="m9 16 2 2 4-4"/></svg>Ao vivo</a>
+    <a href="historico.html" data-nav="historico" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Histórico</a>
   </div>
 </nav>
 
@@ -151,8 +150,10 @@ getJ('data/index.json').then(ix=>{
   IDX=ix; if(!Object.keys(ix.anos||{}).length)throw 0;
   if(ix.atualizado_em)$('upd').textContent='Dados do TSE de '+ix.atualizado_em.slice(0,10).split('-').reverse().join('/');
   fillFilters();
-  const a=$('fAno').value;
-  if(ix.anos[a]?.t2?.c1){$('fTurno').value='t2';fillFilters();$('fCargo').value='c1';fillFilters();$('fUf').value='br';}
+  const q=new URLSearchParams(location.search);
+  const setv=(id,v)=>{if(v&&[...$(id).options].some(o=>o.value===v)){$(id).value=v;fillFilters();return true;}return false;};
+  if(q.get('ano')){setv('fAno',q.get('ano'));setv('fTurno',q.get('turno'));setv('fCargo',q.get('cargo'));setv('fUf',q.get('uf'));}
+  else{const a=$('fAno').value;if(ix.anos[a]?.t2?.c1){setv('fTurno','t2');setv('fCargo','c1');setv('fUf','br');}}
   render();
 }).catch(()=>{$('main').innerHTML='<div class="panel empty"><b>O histórico está sendo montado</b>A rotina baixa os dados do TSE ano a ano. Os resultados aparecem aqui assim que o primeiro ano terminar.</div>';
   ['fAno','fTurno','fCargo','fUf'].forEach(id=>$(id).disabled=true);});

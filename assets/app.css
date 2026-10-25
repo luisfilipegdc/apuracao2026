@@ -53,7 +53,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);
   padding-bottom:env(safe-area-inset-bottom,0px);
   padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px))}
-.nav-in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--nav)}
+.nav-in{max-width:640px;margin:0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);height:var(--nav)}
 .nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;
   font-size:12px;font-weight:700;color:var(--mut);border-radius:10px;margin:6px 2px}
 .nav a svg{width:22px;height:22px}
@@ -71,6 +71,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
 .page{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 .cols{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.cols>.page,.page>.page{margin:0;max-width:none;width:100%}
 @media (min-width:900px){.cols{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:start}}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
 .panel>h2,.h2{font:750 18px/1.2 var(--disp);font-stretch:90%;margin:0 0 12px;text-wrap:balance}
@@ -205,3 +206,8 @@ td{padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 .up{color:var(--go)}.down{color:var(--alert)}
 .empty{padding:28px 8px;text-align:center;color:var(--mut)}
 .empty b{display:block;color:var(--ink);font:750 18px var(--disp);margin-bottom:4px}
+
+/* subabas da apuração */
+.seg{margin:0}
+.seg .chip{text-decoration:none;color:var(--ink)}
+.seg .chip[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}

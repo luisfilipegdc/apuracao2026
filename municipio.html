@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e3e6e0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1210" media="(prefers-color-scheme: dark)">
+<title>Raio-X do Município</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&display=swap">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+.mhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.star{flex:none}
+.star[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.years{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.years::-webkit-scrollbar{display:none}
+.el{display:grid;gap:8px}
+.el h3{margin:0;font:750 17px/1.2 var(--disp);font-stretch:90%;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.el h3 span{font:400 13px var(--body);color:var(--mut)}
+.trend{display:grid;gap:12px}
+.tr{display:grid;gap:6px}
+.tr .lbl{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.tr .lbl b{font-weight:700}
+.cols-y{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;align-items:end;height:56px}
+.cols-y i{display:block;background:var(--ink);border-radius:3px 3px 0 0;min-height:2px}
+.cols-y i.last{background:var(--go)}
+.ylab{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;font-size:10px;color:var(--mut);text-align:center}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="./"><span class="brand-key" aria-hidden="true">✓</span><b>Eleições Brasil</b></a>
+    <div class="live"><i class="dot off"></i><span>Dados oficiais do TSE</span></div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Seções">
+  <div class="nav-in">
+    <a href="./" data-nav="inicio" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>Início</a>
+    <a href="aovivo.html" data-nav="aovivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h5"/><path d="m9 16 2 2 4-4"/></svg>Ao vivo</a>
+    <a href="historico.html" data-nav="historico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Histórico</a>
+  </div>
+</nav>
+
+<main><div class="page" id="app"><div class="panel"><div class="skel" style="height:140px"></div></div></div></main>
+
+<script src="assets/common.js"></script>
+<script>
+(()=>{
+const {UFS,CARGOS,ORD,esc,fmt,pc,title,getJ,favs}=EB;
+const $=id=>document.getElementById(id);
+const q=new URLSearchParams(location.search), cd=q.get('cd'), uf=(q.get('uf')||'').toLowerCase();
+const eleito=s=>/^ELEITO|M[EÉ]DIA/i.test(s||'');
+const cargoKey=k=>{const [a,t,c]=k.split('-');return {ano:+a,turno:+t.slice(1),cargo:+c.slice(1)};};
+
+function fail(msg){$('app').innerHTML=`<div class="panel empty"><b>Município indisponível</b>${esc(msg)} <a href="./">Voltar à busca</a></div>`;}
+if(!cd||!/^[a-z]{2}$/.test(uf)) return fail('O endereço não traz o código da cidade.');
+
+getJ(`data/mun/${uf}/${cd}.json`).then(D=>{
+  const nome=title(D.nm);
+  document.title=`${nome} (${uf.toUpperCase()}) | Eleições Brasil`;
+  const els=Object.entries(D.eleicoes).map(([k,e])=>({k,...cargoKey(k),...e}));
+  const anos=[...new Set(els.map(e=>e.ano))].sort((a,b)=>b-a);
+  let ano=anos[0];
+
+  const card=e=>{
+    const [aptos,comp]=e.det||[0,0];
+    const sub=`${e.turno}º turno${aptos?', '+pc(comp/aptos*100)+' compareceram':''}`;
+    let body='';
+    if(e.cands&&e.cands.length){
+      const tv=e.cands.reduce((a,c)=>a+c.v,0), tot=Object.values(e.partidos).reduce((a,v)=>a+v,0)||tv||1, top=e.cands[0].v||1;
+      body=e.cands.slice(0,e.cargo===13?8:4).map((c,i)=>`<div class="rk tnum"><span class="pos">${i+1}</span><span class="nm">${esc(title(c.nm))} <small>${esc(c.p)}</small>${eleito(c.sit)?'<span class="tag win">Eleito</span>':''}</span><span class="v">${pc(c.v/tot*100)}<small>${fmt(c.v)}</small></span><span class="bar"><i style="width:${c.v/top*100}%"></i></span></div>`).join('');
+    }else{
+      const ps=Object.entries(e.partidos), tot=ps.reduce((a,[,v])=>a+v,0)||1, top=ps[0]?.[1]||1;
+      body=ps.slice(0,5).map(([p,v],i)=>`<div class="rk tnum"><span class="pos">${i+1}</span><span class="nm">${esc(p)} <small>partido</small></span><span class="v">${pc(v/tot*100)}<small>${fmt(v)}</small></span><span class="bar"><i style="width:${v/top*100}%"></i></span></div>`).join('');
+    }
+    return `<article class="panel el"><h3>${esc(CARGOS[e.cargo]||'Cargo '+e.cargo)}<span>${sub}</span></h3><div class="rank">${body}</div></article>`;
+  };
+
+  // força dos partidos ao longo do tempo, por cargo
+  const cargosDisp=[...new Set(els.map(e=>e.cargo))].sort((a,b)=>ORD.indexOf(a)-ORD.indexOf(b));
+  let tcargo=cargosDisp.includes(13)?13:cargosDisp.includes(6)?6:cargosDisp[0];
+  function trend(){
+    const serie=els.filter(e=>e.cargo===tcargo).sort((a,b)=>a.ano-b.ano||a.turno-b.turno).filter((e,i,arr)=>!arr.some(o=>o.ano===e.ano&&o.turno<e.turno));
+    if(!serie.length)return '<p class="note">Sem dados para este cargo.</p>';
+    const shares=serie.map(e=>{const t=Object.values(e.partidos).reduce((a,v)=>a+v,0)||1;return Object.fromEntries(Object.entries(e.partidos).map(([p,v])=>[p,v/t*100]));});
+    const last=shares[shares.length-1];
+    const partidos=Object.keys(last).sort((a,b)=>last[b]-last[a]).slice(0,6);
+    const max=Math.max(...partidos.flatMap(p=>shares.map(s=>s[p]||0)),1);
+    return partidos.map(p=>{const vals=shares.map(s=>s[p]||0);const prev=vals.length>1?vals[vals.length-2]:null;const dv=prev==null?null:vals[vals.length-1]-prev;
+      return `<div class="tr"><div class="lbl"><b>${esc(p)}</b><span class="tnum">${pc(vals[vals.length-1])}${dv==null?'':` <span class="${dv>=0?'up':'down'}">${dv>=0?'+':'−'}${Math.abs(dv).toFixed(1).replace('.',',')} pp</span>`}</span></div>
+      <div class="cols-y" aria-hidden="true">${vals.map((v,i)=>`<i class="${i===vals.length-1?'last':''}" style="height:${v/max*100}%" title="${serie[i].ano}: ${pc(v)}"></i>`).join('')}</div>
+      <div class="ylab tnum">${serie.map(e=>`<span>${String(e.ano).slice(2)}</span>`).join('')}</div></div>`;}).join('')
+      +`<p class="note">Parcela dos votos válidos de ${esc((CARGOS[tcargo]||'').toLowerCase())} por partido, em cada eleição. Variação contra a eleição anterior. Partidos mudam de nome e se fundem; compare siglas com cuidado.</p>`;
+  }
+
+  function render(){
+    const doAno=els.filter(e=>e.ano===ano).sort((a,b)=>ORD.indexOf(a.cargo)-ORD.indexOf(b.cargo)||b.turno-a.turno);
+    const fav=favs.has(cd);
+    $('app').innerHTML=`
+      <div class="mhead"><div><h1 class="title">${esc(nome)}</h1><p class="lead">${esc(UFS[uf]||uf.toUpperCase())}, ${uf.toUpperCase()}. ${anos.length} ${anos.length===1?'eleição':'eleições'} registradas, de ${anos[anos.length-1]} a ${anos[0]}.</p></div>
+        <button class="iconbtn star" id="fav" type="button" aria-pressed="${fav}">${fav?'Salva':'Salvar'}</button></div>
+      <div class="years" role="group" aria-label="Escolher eleição">${anos.map(a=>`<button class="chip" type="button" data-a="${a}" aria-pressed="${a===ano}">${a}</button>`).join('')}</div>
+      <div class="cols"><div class="page">${doAno.map(card).join('')||'<div class="panel empty">Sem dados neste ano.</div>'}</div>
+        <div class="page"><div class="panel"><h2>Força dos partidos</h2>
+          <label class="field" for="tc">Cargo<select id="tc">${cargosDisp.map(c=>`<option value="${c}"${c===tcargo?' selected':''}>${esc(CARGOS[c])}</option>`).join('')}</select></label>
+          <div class="trend" id="trend" style="margin-top:12px">${trend()}</div></div>
+          <div class="panel"><h2>Fonte</h2><p class="note">Portal de Dados Abertos do TSE, votação por candidato e por partido somada por município, e detalhe da votação. Arquivos por ano: ${Object.entries(D.fontes||{}).sort().map(([a,f])=>`<a href="${esc(f.candidatos)}" rel="noopener">${a}</a>`).join(', ')}.</p></div>
+        </div></div>`;
+    $('fav').onclick=()=>{const on=favs.toggle({cd,uf,nm:nome});$('fav').setAttribute('aria-pressed',on);$('fav').textContent=on?'Salva':'Salvar';};
+    document.querySelectorAll('.years .chip').forEach(b=>b.onclick=()=>{ano=+b.dataset.a;render();});
+    $('tc').onchange=e=>{tcargo=+e.target.value;$('trend').innerHTML=trend();};
+  }
+  render();
+}).catch(()=>fail('Os dados desta cidade ainda não foram carregados.'));
+})();
+</script>
+</body>
+</html>

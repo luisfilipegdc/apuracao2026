@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e3e6e0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1210" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Apuração ao vivo das eleições com dados oficiais do TSE: presidente, estados e governadores.">
+<title>Apuração ao Vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&display=swap">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="./"><span class="brand-key" aria-hidden="true">✓</span><b>Apuração</b></a>
+    <div class="live" role="status" aria-live="polite"><i class="dot off" id="dot"></i><span id="stTxt">Conectando ao TSE</span></div>
+    <button class="iconbtn" id="btnNow" type="button" aria-label="Atualizar agora"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg><span id="cd" class="tnum"></span></button>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Seções">
+  <div class="nav-in">
+    <a href="./" data-nav="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>Início</a>
+    <a href="aovivo.html" data-nav="aovivo" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h5"/><path d="m9 16 2 2 4-4"/></svg>Ao vivo</a>
+    <a href="historico.html" data-nav="historico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Histórico</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page">
+    <div class="banner" id="stale" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+      <p><b id="staleT">Sem dados novos do TSE</b><span id="staleD"></span></p>
+    </div>
+
+    <!-- PRESIDENTE -->
+    <div class="chips seg" role="tablist" aria-label="Painéis da apuração">
+      <a class="chip" href="#presidente" data-tab="presidente">Presidente</a>
+      <a class="chip" href="#estados" data-tab="estados">Por estado</a>
+      <a class="chip" href="#governadores" data-tab="governadores">Governadores</a>
+    </div>
+
+    <section id="tab-presidente" class="page" data-panel="presidente">
+      <div>
+        <h1 class="title">Presidente, 2º turno</h1>
+        <p class="lead">Eleições 2026, votos válidos, dados oficiais do TSE.</p>
+      </div>
+
+      <div class="cols">
+        <div class="page">
+          <div class="panel">
+            <div class="score" id="score">
+              <div class="skel" style="height:52px"></div><div class="skel" style="height:52px"></div>
+            </div>
+            <div class="split" aria-hidden="true"><i id="barA" style="width:50%;background:var(--a)"></i><i id="barB" style="width:50%;background:var(--b)"></i><span class="half"></span></div>
+            <p class="gap-line tnum" id="gap"></p>
+            <div class="counted tnum">
+              <div class="row"><span>Seções apuradas</span><b id="pst">–</b></div>
+              <div class="meter"><i id="pstBar" style="width:0"></i></div>
+              <div class="row note"><span id="pstN"></span><span id="hg"></span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2>Quanto falta para virar</h2>
+            <div id="proj"><p class="note">Aguardando os primeiros números.</p></div>
+          </div>
+
+          <div class="panel">
+            <h2>Comparado ao 1º turno e a 2022</h2>
+            <div id="cmp"><div class="skel" style="height:90px"></div></div>
+          </div>
+        </div>
+
+        <div class="page">
+          <div class="panel">
+            <h2>Participação</h2>
+            <div class="stats tnum" id="kpis"></div>
+          </div>
+          <div class="panel chart">
+            <h2>Evolução na apuração</h2>
+            <div id="evo"><p class="note">O gráfico aparece a partir da segunda atualização com números novos. Fica guardado só neste aparelho.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTADOS -->
+    <section id="tab-estados" class="page" data-panel="estados" hidden>
+      <div>
+        <h1 class="title">Presidente por estado</h1>
+        <p class="lead" id="ufWins">Toque num estado para ver 1º turno, 2022 e abstenção.</p>
+      </div>
+      <div class="chips" role="group" aria-label="Ordenar estados" id="chips">
+        <button class="chip" type="button" data-s="te" aria-pressed="true">Maiores eleitorados</button>
+        <button class="chip" type="button" data-s="marg" aria-pressed="false">Mais apertados</button>
+        <button class="chip" type="button" data-s="sw" aria-pressed="false">Mais mudaram</button>
+        <button class="chip" type="button" data-s="pst" aria-pressed="false">Mais apurados</button>
+        <button class="chip" type="button" data-s="nm" aria-pressed="false">A a Z</button>
+      </div>
+      <div class="list grid" id="ufList"><div class="skel" style="height:80px"></div><div class="skel" style="height:80px"></div><div class="skel" style="height:80px"></div></div>
+    </section>
+
+    <!-- GOVERNADORES -->
+    <section id="tab-governadores" class="page" data-panel="governadores" hidden>
+      <div>
+        <h1 class="title">Governadores em 2º turno</h1>
+        <p class="lead">Estados que voltaram às urnas para escolher governador.</p>
+      </div>
+      <div class="govs" id="govs"><div class="skel" style="height:140px"></div><div class="skel" style="height:140px"></div></div>
+    </section>
+
+    <footer class="foot">
+      <p>Fonte: arquivos oficiais de divulgação do TSE em <a href="https://resultados.tse.jus.br/oficial/app/index.html" target="_blank" rel="noopener">resultados.tse.jus.br</a> (eleições 6258, 6260 e 6257). Números parciais até a totalização final. Atualiza sozinho a cada 30 segundos.</p>
+      <p>2º turno de 2022 por estado: calculado dos <a href="https://dadosabertos.tse.jus.br/" target="_blank" rel="noopener">Dados Abertos do TSE</a> (votação por partido, município e zona).</p>
+    </footer>
+  </div>
+</main>
+
+<script>
+(()=>{
+// Configuração da eleição ao vivo. Para a próxima eleição, troque o ciclo e os códigos publicados pelo TSE em
+// https://www.tse.jus.br/eleicoes/informacoes-tecnicas-sobre-a-divulgacao-de-resultados
+const BASE='https://resultados.tse.jus.br/oficial/ele2026';
+const FED='6258', EST='6260', T1E='6257';
+const pad=e=>String(e).padStart(6,'0');
+const UFS={ac:'Acre',al:'Alagoas',am:'Amazonas',ap:'Amapá',ba:'Bahia',ce:'Ceará',df:'Distrito Federal',es:'Espírito Santo',go:'Goiás',ma:'Maranhão',mg:'Minas Gerais',ms:'Mato Grosso do Sul',mt:'Mato Grosso',pa:'Pará',pb:'Paraíba',pe:'Pernambuco',pi:'Piauí',pr:'Paraná',rj:'Rio de Janeiro',rn:'Rio Grande do Norte',ro:'Rondônia',rr:'Roraima',rs:'Rio Grande do Sul',sc:'Santa Catarina',se:'Sergipe',sp:'São Paulo',to:'Tocantins',zz:'Exterior'};
+const GOV_FALLBACK=['ac','am','df','es','rn','to'];
+const INTERVAL=30, STALE_MIN=10;
+// 2º turno 2022, % do PT (13) sobre PT+PL. Fonte: TSE Dados Abertos, votacao_partido_munzona_2022 (turno 2, cargo Presidente).
+const R22={br:{a:50.90,b:49.10,pc:79.41},ac:29.70,al:58.68,am:51.10,ap:48.64,ba:72.12,ce:69.97,df:41.19,es:41.96,go:41.29,ma:71.14,mg:50.20,ms:40.51,mt:34.92,pa:54.75,pb:66.62,pe:66.93,pi:76.86,pr:37.60,rj:43.47,rn:65.10,ro:29.34,rr:23.92,rs:43.65,sc:30.73,se:67.21,sp:44.76,to:51.36,zz:51.28};
+const T1={}; let T1BR=null;
+const $=id=>document.getElementById(id);
+const n=s=>+String(s??0).replace(/\./g,'').replace(',','.')||0;
+const fmt=x=>Math.round(x).toLocaleString('pt-BR');
+const pc=x=>(+x||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+const pc1=x=>(+x||0).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+const pp=x=>(x>=0?'+':'−')+Math.abs(x).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+' pp';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const title=s=>String(s).toLowerCase().replace(/(^|\s)(\S)/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(Da|De|Do|Dos|Das|E)\b/g,w=>w.toLowerCase());
+
+/* abas */
+const TABS=['presidente','estados','governadores'];
+function showTab(){
+  const t=TABS.includes(location.hash.slice(1))?location.hash.slice(1):'presidente';
+  document.querySelectorAll('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==t);
+  document.querySelectorAll('.seg a[data-tab]').forEach(a=>a.setAttribute('aria-current',a.dataset.tab===t?'true':'false'));
+}
+addEventListener('hashchange',()=>{showTab();scrollTo(0,0);});
+showTab();
+
+/* fila: até 3 requisições simultâneas, para não levar 429 do TSE */
+const Q=[];let active=0;const MAXC=3,GAP=150;
+const slot=()=>new Promise(r=>{Q.push(r);pump();});
+function pump(){while(active<MAXC&&Q.length){active++;Q.shift()();}}
+function release(){setTimeout(()=>{active--;pump();},GAP);}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function get(path,tries=4){
+  for(let i=0;i<tries;i++){
+    await slot(); let r;
+    try{r=await fetch(BASE+path,{cache:'no-cache'});}finally{release();}
+    if(r.status===429||r.status>=500){await sleep(2000*2**i+Math.random()*800);continue;}
+    if(!r.ok) throw new Error('o TSE respondeu '+r.status);
+    return r.json();
+  }
+  throw new Error('o TSE limitou as consultas');
+}
+function slim(d){return {s:d.s,e:d.e,v:d.v,dg:d.dg,hg:d.hg,and:d.and,tf:d.tf,carg:[{agr:(d.carg?.[0]?.agr||[]).map(a=>({par:a.par.map(p=>({sg:p.sg,cand:p.cand.map(k=>({n:k.n,nm:k.nm,nmu:k.nmu,vap:k.vap,pvap:k.pvap,e:k.e,st:k.st,seq:k.seq}))}))}))}]};}
+function cands(d){
+  const out=[];
+  (d.carg||[]).forEach(c=>(c.agr||[]).forEach(a=>(a.par||[]).forEach(p=>(p.cand||[]).forEach(k=>out.push({n:k.n,nm:title(k.nmu||k.nm),par:p.sg,vap:n(k.vap),pvap:n(k.pvap),e:k.e==='s',seq:+k.seq||0})))));
+  return out.sort((x,y)=>x.n.localeCompare(y.n));
+}
+function summary(d){
+  return {pst:n(d.s?.pst),st:n(d.s?.st),ts:n(d.s?.ts),te:n(d.e?.te),c:n(d.e?.c),pc:n(d.e?.pc),a:n(d.e?.a),pa:n(d.e?.pa),esnt:n(d.e?.esnt),
+    vv:n(d.v?.vv),vb:n(d.v?.vb),pvb:n(d.v?.pvb),vn:n(d.v?.tvn),pvn:n(d.v?.ptvn),tv:n(d.v?.tv),dg:d.dg,hg:d.hg,final:d.and==='f'||d.tf==='s'};
+}
+let ORDER=null;
+const ordered=cs=>{if(!ORDER)ORDER=cs.map(c=>c.n);return ORDER.map(k=>cs.find(c=>c.n===k)).filter(Boolean);};
+const COL=['var(--a)','var(--b)'];
+
+let hist=[];
+try{hist=JSON.parse(localStorage.getItem('apur26_hist')||'[]')}catch(e){hist=[]}
+const saveHist=()=>{try{localStorage.setItem('apur26_hist',JSON.stringify(hist.slice(-400)))}catch(e){}};
+
+function fileTime(s){const [d,m,y]=(s.dg||'').split('/');const [h,mi,se]=(s.hg||'0:0:0').split(':');return new Date(+y,+m-1,+d,+h,+mi,+se);}
+
+let PRES=null;
+function renderPres(d){
+  const cs=ordered(cands(d)), s=summary(d); const [A,B]=cs; PRES={A,B,s};
+  $('score').innerHTML=cs.map((c,i)=>`<div class="cand" style="--c:${COL[i]}">
+      <div class="key" aria-hidden="true">${esc(c.n)}</div>
+      <div class="who"><b>${esc(c.nm)}${c.e?'<span class="elected">Eleito</span>':''}</b><span>${esc(c.par)}, número ${esc(c.n)}</span></div>
+      <div class="pct tnum">${pc1(c.pvap)}<small>${fmt(c.vap)} votos</small></div></div>`).join('');
+  const tot=A.vap+B.vap||1;
+  $('barA').style.width=(A.vap/tot*100)+'%'; $('barB').style.width=(B.vap/tot*100)+'%';
+  const lead=A.vap-B.vap, ld=lead>=0?A:B;
+  $('gap').innerHTML=tot>1?`${esc(ld.nm)} está à frente por <span style="color:${lead>=0?COL[0]:COL[1]}">${fmt(Math.abs(lead))} votos</span>.`:'A contagem ainda não começou.';
+  $('pst').textContent=pc(s.pst); $('pstBar').style.width=s.pst+'%';
+  $('pstN').textContent=fmt(s.st)+' de '+fmt(s.ts)+' seções';
+  $('hg').textContent='Arquivo do TSE: '+(s.dg||'')+' '+(s.hg||'');
+  $('kpis').innerHTML=[
+    [pc(s.pc),'comparecimento'],[pc(s.pa),'abstenção'],[fmt(s.vv),'votos válidos'],
+    [pc(s.pvb),'brancos'],[pc(s.pvn),'nulos'],[fmt(s.esnt),'eleitores em seções ainda não apuradas']
+  ].map(([b,t])=>`<div class="stat"><b>${b}</b><span>${t}</span></div>`).join('');
+
+  // aviso quando o TSE para de publicar
+  const age=(Date.now()-fileTime(s).getTime())/60000;
+  const stale=!s.final&&s.pst<100&&age>STALE_MIN;
+  $('stale').hidden=!stale;
+  if(stale){$('staleT').textContent='Sem números novos do TSE desde '+(s.hg||'').slice(0,5);
+    $('staleD').textContent=' O último arquivo publicado tem '+pc(s.pst)+' das seções. O painel confere de novo a cada 30 segundos e atualiza sozinho quando sair o próximo.';}
+
+  // virada
+  const trail=lead>=0?B:A, ti=lead>=0?1:0, gap=Math.abs(lead);
+  const turnout=s.c&&s.te-s.esnt>0?s.c/(s.te-s.esnt):0.78;
+  const validRate=s.tv?s.vv/s.tv:0.95;
+  const rem=s.esnt*turnout*validRate;
+  if(s.final||s.pst>=100){$('proj').innerHTML=`<p class="swing">Apuração concluída. ${esc(ld.nm)} venceu por ${fmt(gap)} votos.</p>`;}
+  else if(s.pst<1){$('proj').innerHTML=`<p class="note">Com ${pc(s.pst)} das seções apuradas, a conta ainda não diz nada. Ela passa a valer depois de uns 5% apurados.</p>`;}
+  else{
+    const need=(rem+gap)/(2*rem)*100, poss=need<=100;
+    const read=!poss?'Não dá mais para virar com os eleitores que faltam.':need>60?'Virada muito improvável no ritmo atual.':need>53?'Virada difícil, mas possível se as seções restantes forem de redutos de quem está atrás.':'Disputa aberta: a diferença cabe nos votos que faltam.';
+    $('proj').innerHTML=`<p class="swing" style="--c:${COL[ti]}"><em>${esc(trail.nm)}</em> precisa de ${poss?pc1(need):'mais de 100%'} dos votos que faltam.</p>
+      <div class="need" aria-hidden="true"><span style="width:${Math.min(need,100)}%;background:${COL[ti]}"></span><i style="left:calc(${Math.min(need,100)}% - 1px)"></i></div>
+      <div class="scale"><span>0%</span><span>50%</span><span>100%</span></div>
+      <p class="note" style="margin-top:10px">${read} Faltam cerca de ${fmt(rem)} votos válidos. Conta simples: não considera de quais regiões são as seções restantes.</p>`;
+  }
+  const last=hist[hist.length-1];
+  if(s.pst>0&&(!last||last.pst!==s.pst||last.a!==A.pvap)){hist.push({t:s.hg,pst:s.pst,a:A.pvap,b:B.pvap});saveHist();}
+  renderEvo(); renderCmp();
+}
+
+function renderEvo(){
+  const pts=hist.filter(h=>h.pst>0); if(pts.length<2)return;
+  const W=600,H=260,L=40,R=14,T=14,Bm=30;
+  const ys=pts.flatMap(p=>[p.a,p.b]);
+  const lo=Math.floor(Math.min(...ys,48)-1), hi=Math.ceil(Math.max(...ys,52)+1);
+  const x=v=>L+(v/100)*(W-L-R), y=v=>T+(hi-v)/(hi-lo)*(H-T-Bm);
+  let g=''; const step=Math.max(1,Math.round((hi-lo)/5));
+  for(let v=Math.ceil(lo/step)*step;v<=hi;v+=step) g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}%</text>`;
+  g+=`<line x1="${L}" x2="${W-R}" y1="${y(50)}" y2="${y(50)}" stroke="var(--ink)" stroke-dasharray="4 4" opacity=".45"/>`;
+  [0,25,50,75,100].forEach(v=>g+=`<text x="${x(v)}" y="${H-8}" text-anchor="middle">${v}%</text>`);
+  const line=(k,c)=>{const d=pts.map((p,i)=>(i?'L':'M')+x(p.pst).toFixed(1)+','+y(p[k]).toFixed(1)).join('');const e=pts[pts.length-1];
+    return `<path d="${d}" fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round"/><circle cx="${x(e.pst)}" cy="${y(e[k])}" r="5" fill="${c}"/>`;};
+  $('evo').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Percentual de cada candidato conforme a apuração avança">${g}${line('a',COL[0])}${line('b',COL[1])}</svg>
+    <p class="note" style="margin-top:6px">Horizontal: seções apuradas. Guardado só neste aparelho. <button class="textbtn" type="button" id="clrH">Apagar</button></p>`;
+  $('clrH').onclick=()=>{hist=[];saveHist();$('evo').innerHTML='<p class="note">Gráfico apagado. Ele recomeça na próxima atualização.</p>';};
+}
+
+async function loadT1(){
+  const ufs=Object.keys(UFS);
+  const pick=d=>{const cs=cands(d),s=summary(d);const f=k=>cs.find(x=>x.n===k)||{pvap:0,vap:0};return {cs,s,f};};
+  try{const c=JSON.parse(localStorage.getItem('apur26_t1')||'null');if(c&&c.br){T1BR=pick(c.br);Object.entries(c.ufs).forEach(([u,d])=>T1[u]=pick(d));return;}}catch(e){}
+  const raw={br:null,ufs:{}};
+  const [br,...res]=await Promise.allSettled([get(`/${T1E}/dados/br/br-c0001-e${pad(T1E)}-u.json`),...ufs.map(u=>get(`/${T1E}/dados/${u}/${u}-c0001-e${pad(T1E)}-u.json`))]);
+  if(br.status==='fulfilled'){T1BR=pick(br.value);raw.br=slim(br.value);}
+  res.forEach((r,i)=>{if(r.status==='fulfilled'){T1[ufs[i]]=pick(r.value);raw.ufs[ufs[i]]=slim(r.value);}});
+  if(raw.br&&Object.keys(raw.ufs).length===ufs.length){try{localStorage.setItem('apur26_t1',JSON.stringify(raw))}catch(e){}}
+  renderCmp(); renderUfs();
+}
+
+function renderCmp(){
+  if(!PRES)return;
+  if(!T1BR){$('cmp').innerHTML='<p class="note">Carregando o 1º turno.</p>';return;}
+  const {A,B,s}=PRES, a1=T1BR.f(A.n), b1=T1BR.f(B.n);
+  const others=T1BR.cs.filter(c=>c.n!==A.n&&c.n!==B.n).sort((x,y)=>y.vap-x.vap);
+  const oth=others.reduce((t,c)=>t+c.pvap,0);
+  const row=(lbl,sub,pa,pb,full)=>{const t=pa+pb||1;return `<div class="cmp-row"><div class="lbl"><b>${lbl}</b><span class="note">${sub}</span></div>
+    <div class="split" style="height:10px;margin:0"><i style="width:${pa/(full?100:t)*100}%;background:var(--a)"></i>${full?`<i style="width:${100-pa-pb}%;background:var(--line)"></i>`:''}<i style="width:${pb/(full?100:t)*100}%;background:var(--b)"></i></div>
+    <div class="nums tnum"><span style="color:var(--a)">${pc1(pa)}</span>${full?`<span class="note">outros ${pc1(100-pa-pb)}</span>`:''}<span style="color:var(--b)">${pc1(pb)}</span></div></div>`;};
+  $('cmp').innerHTML=`<div class="cmp">
+    ${row('Agora',pc(s.pst)+' apurado',A.pvap,B.pvap)}
+    ${row('1º turno 2026','resultado final',a1.pvap,b1.pvap,true)}
+    ${row('2º turno 2022','PT contra PL',R22.br.a,R22.br.b)}
+  </div>
+  <p class="note" style="margin-top:12px">No 1º turno, os outros candidatos somaram ${pc1(oth)} dos votos válidos (${others.slice(0,3).map(c=>esc(c.nm)+' '+pc1(c.pvap)).join(', ')}). Desde então: ${esc(A.nm)} ${pp(A.pvap-a1.pvap)}, ${esc(B.nm)} ${pp(B.pvap-b1.pvap)}.</p>`;
+}
+
+let ufRows=[], sortKey='te';
+async function loadUfs(){
+  const ufs=Object.keys(UFS);
+  const res=await Promise.allSettled(ufs.map(u=>get(`/${FED}/dados/${u}/${u}-c0001-e${pad(FED)}-u.json`)));
+  const prev=Object.fromEntries(ufRows.map(r=>[r.uf,r]));
+  ufRows=res.map((r,i)=>{
+    if(r.status!=='fulfilled') return prev[ufs[i]]||null;
+    const d=r.value,cs=ordered(cands(d)),s=summary(d);
+    return {uf:ufs[i],nm:UFS[ufs[i]],te:s.te,pst:s.pst,pa:s.pa,a:cs[0],b:cs[1]};
+  }).filter(Boolean);
+  renderUfs();
+}
+function renderUfs(){
+  if(!ufRows.length)return;
+  const open=new Set([...document.querySelectorAll('details.uf[open]')].map(d=>d.dataset.uf));
+  const k=sortKey;
+  const rows=[...ufRows].sort((p,q)=>{
+    if(k==='te')return q.te-p.te; if(k==='pst')return q.pst-p.pst; if(k==='nm')return p.nm.localeCompare(q.nm);
+    if(k==='sw'){const g=r=>T1[r.uf]?Math.abs(r.a.pvap-T1[r.uf].f(r.a.n).pvap):-1;return g(q)-g(p);}
+    return Math.abs(p.a.pvap-p.b.pvap)-Math.abs(q.a.pvap-q.b.pvap);
+  });
+  $('ufList').innerHTML=rows.map(r=>{
+    const t=r.a.vap+r.b.vap, wa=t?r.a.vap/t*100:50, m=r.a.vap-r.b.vap;
+    const T=T1[r.uf], t1=T?{a:T.f(r.a.n),b:T.f(r.b.n)}:null;
+    const r22=typeof R22[r.uf]==='number'?R22[r.uf]:null;
+    const leadName=t?(m>=0?r.a.nm:r.b.nm):'';
+    return `<details class="uf" data-uf="${r.uf}"${open.has(r.uf)?' open':''}><summary>
+      <span class="ufkey">${r.uf.toUpperCase()}</span>
+      <span class="ufname">${esc(r.nm)}</span><span class="ufcount tnum">${pc1(r.pst)} apurado</span>
+      <span class="ufbar tnum"><span style="color:var(--a)">${t?pc1(r.a.pvap):'–'}</span><span class="split">${t?`<i style="width:${wa}%;background:var(--a)"></i><i style="width:${100-wa}%;background:var(--b)"></i>`:''}<span class="half"></span></span><span style="color:var(--b)">${t?pc1(r.b.pvap):'–'}</span></span>
+    </summary>
+    <div class="ufmore tnum">
+      <div><span>Diferença</span><b>${t?fmt(Math.abs(m))+' votos para '+esc(leadName):'Sem votos ainda'}</b></div>
+      <div><span>Abstenção</span><b>${pc(r.pa)}</b></div>
+      <div><span>1º turno 2026</span><b class="pair"><span style="color:var(--a)">${t1?pc1(t1.a.pvap):'–'}</span> × <span style="color:var(--b)">${t1?pc1(t1.b.pvap):'–'}</span></b></div>
+      <div><span>${esc(r.a.nm)} desde o 1º turno</span><b>${t1&&t?pp(r.a.pvap-t1.a.pvap):'–'}</b></div>
+      <div><span>2º turno 2022 (PT × PL)</span><b class="pair">${r22!=null?`<span style="color:var(--a)">${pc1(r22)}</span> × <span style="color:var(--b)">${pc1(100-r22)}</span>`:'–'}</b></div>
+      <div><span>Eleitores</span><b>${fmt(r.te)}</b></div>
+    </div></details>`;}).join('');
+  const A=ufRows[0].a.nm,B=ufRows[0].b.nm;
+  const wa=ufRows.filter(r=>r.uf!=='zz'&&r.a.vap>r.b.vap).length, wb=ufRows.filter(r=>r.uf!=='zz'&&r.b.vap>r.a.vap).length;
+  $('ufWins').textContent=(wa+wb?`${A} lidera em ${wa} estados e ${B} em ${wb}. `:'')+'Toque num estado para ver 1º turno, 2022 e abstenção.';
+}
+$('chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;sortKey=b.dataset.s;
+  document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));renderUfs();});
+
+let govUfs=null, govDone=false;
+async function loadGovs(){
+  if(!govUfs){try{const ab=await get(`/${EST}/dados/br/br-e${pad(EST)}-ab.json`);govUfs=ab.abr.filter(a=>a.tpabr==='uf').map(a=>a.cdabr);}catch(e){govUfs=GOV_FALLBACK;}}
+  govDone=true;
+  const res=await Promise.allSettled(govUfs.map(u=>get(`/${EST}/dados/${u}/${u}-c0003-e${pad(EST)}-u.json`)));
+  $('govs').innerHTML=res.map((r,i)=>{
+    const u=govUfs[i];
+    if(r.status!=='fulfilled') return `<article class="gov"><header><h3>${esc(UFS[u]||u.toUpperCase())}</h3></header><p class="note">Sem números do TSE ainda.</p></article>`;
+    const d=r.value,s=summary(d),cs=cands(d).sort((x,y)=>y.vap-x.vap||x.seq-y.seq);
+    const t=cs.reduce((a,c)=>a+c.vap,0);
+    const diff=cs.length>1?cs[0].vap-cs[1].vap:0;
+    return `<article class="gov"><header><h3>${esc(UFS[u]||u)}</h3><span class="tnum">${pc1(s.pst)} apurado</span></header>
+      ${cs.map((c,j)=>`<div class="gc tnum"><span class="nm">${esc(c.nm)} <small>${esc(c.par)}</small>${c.e?'<span class="elected">Eleito</span>':''}</span><span class="p" style="color:${j===0&&t?'var(--ink)':'var(--mut)'}">${t?pc1(c.pvap):'–'}</span><div class="bar"><i style="width:${t?c.vap/t*100:0}%;background:${j===0?'var(--ink)':'var(--mut)'}"></i></div></div>`).join('')}
+      <p class="note tnum">${t?'Diferença de '+fmt(diff)+' votos. ':''}Abstenção ${pc1(s.pa)}. Arquivo das ${esc((s.hg||'–').slice(0,5))}.</p></article>`;
+  }).join('');
+}
+
+/* ciclo de atualização */
+let left=INTERVAL,busy=false,nCycle=0;
+async function cycle(){
+  if(busy)return; busy=true; $('stTxt').textContent='Atualizando';
+  try{
+    const d=await get(`/${FED}/dados/br/br-c0001-e${pad(FED)}-u.json`);
+    renderPres(d);
+    if(nCycle%2===0||!ufRows.length) await loadUfs();
+    if(nCycle%2===1||!govDone) await loadGovs();
+    nCycle++;
+    $('dot').className='dot '+($('stale').hidden?'on':'wait');
+    $('stTxt').textContent='Ao vivo, conferido às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }catch(e){
+    $('dot').className='dot wait';
+    $('stTxt').textContent='Sem resposta: '+e.message;
+  }finally{busy=false;left=INTERVAL;}
+}
+setInterval(()=>{left--;$('cd').textContent=left>0&&!busy?left+'s':'';if(left<=0)cycle();},1000);
+$('btnNow').onclick=cycle;
+cycle();
+loadT1();
+})();
+</script>
+</body>
+</html>
