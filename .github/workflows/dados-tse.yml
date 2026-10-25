@@ -1,0 +1,49 @@
+name: Atualizar dados do TSE
+
+on:
+  workflow_dispatch:
+    inputs:
+      anos:
+        description: "Anos separados por espaço (vazio = 2000 a 2024)"
+        required: false
+        default: ""
+  schedule:
+    - cron: "17 6 1 * *"   # todo dia 1, 03h17 de Brasília: reprocessa os 2 últimos anos
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dados-tse
+  cancel-in-progress: false
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Definir anos
+        id: anos
+        run: |
+          if [ -n "${{ github.event.inputs.anos }}" ]; then
+            echo "lista=${{ github.event.inputs.anos }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "lista=2022 2024" >> "$GITHUB_OUTPUT"
+          else
+            echo "lista=2000 2002 2004 2006 2008 2010 2012 2014 2016 2018 2020 2022 2024" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Processar ano a ano e salvar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for ano in ${{ steps.anos.outputs.lista }}; do
+            python scripts/etl_tse.py "$ano" || echo "Ano $ano falhou"
+            git add data
+            git commit -q -m "Dados TSE $ano" || echo "Sem mudanças em $ano"
+            git pull -q --rebase origin "${GITHUB_REF_NAME}"
+            git push -q origin "HEAD:${GITHUB_REF_NAME}"
+          done

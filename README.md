@@ -1,9 +1,16 @@
-# Apuração 2º turno 2026
+# Eleições Brasil — Ao vivo e Histórico
 
-Painel ao vivo da apuração do 2º turno das Eleições 2026 (Presidente e Governadores), com comparativo com o 1º turno de 2026 e o 2º turno de 2022.
+App público com resultados eleitorais oficiais do TSE.
 
-**Fontes**
-- Ao vivo e 1º turno 2026: arquivos JSON oficiais de divulgação do TSE em `resultados.tse.jus.br` (eleições 6258, 6260 e 6257).
-- 2º turno 2022 por estado: calculado dos Dados Abertos do TSE (`votacao_partido_munzona_2022`, turno 2, cargo Presidente).
+- **Ao vivo** (`index.html`): lê os arquivos JSON oficiais de divulgação do TSE em `resultados.tse.jus.br` durante a apuração. Para a próxima eleição, troque o ciclo e os códigos no topo do script (o TSE publica em https://www.tse.jus.br/eleicoes/informacoes-tecnicas-sobre-a-divulgacao-de-resultados).
+- **Histórico** (`historico.html`): resultados desde 2000 por estado e município, lidos de `data/`.
 
-Números parciais até a totalização final. Fonte oficial: https://resultados.tse.jus.br
+## De onde vêm os dados do histórico
+
+`scripts/etl_tse.py` baixa do Portal de Dados Abertos do TSE:
+- `votacao_candidato_munzona_<ano>.zip` (votos por candidato, município e zona)
+- `detalhe_votacao_munzona_<ano>.zip` (aptos, comparecimento, abstenção, brancos, nulos)
+
+Granularidade: Presidente, Governador, Senador, Prefeito e Vereador por município; Deputados por estado.
+
+A rotina **Atualizar dados do TSE** (GitHub Actions) roda manualmente e todo dia 1º do mês.

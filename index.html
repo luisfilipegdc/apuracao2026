@@ -1,5 +1,5 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Apuração 2º Turno 2026</title>
+<title>Apuração ao Vivo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -17,7 +17,7 @@
 :root[data-theme="dark"]{--bg:#0f1311;--card:#171d1a;--fg:#e8ede9;--mut:#93a09a;--line:#28302c;--a:#f0564f;--b:#5b8cf0;--ok:#4cc38a;--warn:#e9a23b;color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font:15px/1.45 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
-.wrap{max-width:1080px;margin:0 auto;display:grid;gap:16px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .tnum{font-variant-numeric:tabular-nums}
 header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:end;justify-content:space-between}
 h1{font:800 clamp(22px,5vw,32px)/1.05 var(--disp);font-stretch:85%;margin:0;letter-spacing:-.01em;text-wrap:balance}
@@ -75,6 +75,8 @@ td.num,th.num{text-align:right}
 .chart text{fill:var(--mut);font:11px var(--body)}
 .note{font-size:12px;color:var(--mut);margin:0}
 .err{color:var(--warn)}
+.tab{font:600 13px var(--body);color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card)}
+.tab.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 footer{font-size:12px;color:var(--mut);text-align:center}
 footer a{color:inherit}
 @media (max-width:520px){.score{gap:8px}.cand .v{font-size:12px}}
@@ -82,6 +84,7 @@ footer a{color:inherit}
 </style>
 
 <div class="wrap">
+  <nav style="display:flex;gap:6px;flex-wrap:wrap"><a class="tab on" href="./" aria-current="page">Ao vivo</a><a class="tab" href="./historico.html">Histórico</a></nav>
   <header>
     <div>
       <p class="eyebrow">Eleições 2026 · 2º turno · 25 de outubro</p>
@@ -162,6 +165,8 @@ footer a{color:inherit}
 
 <script>
 (()=>{
+// Configuração da eleição ao vivo. Para a próxima eleição, troque o ciclo e os códigos publicados pelo TSE em
+// https://www.tse.jus.br/eleicoes/informacoes-tecnicas-sobre-a-divulgacao-de-resultados
 const BASE='https://resultados.tse.jus.br/oficial/ele2026';
 const FED='6258', EST='6260';
 const pad=e=>String(e).padStart(6,'0');
