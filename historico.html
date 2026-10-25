@@ -3,186 +3,159 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e3e6e0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1210" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Resultados oficiais das eleições brasileiras desde 2000, por estado e município, com dados do TSE.">
 <title>Histórico Eleitoral</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
-<style>
-/* Layout: consulta — filtros no topo, resumo de participação, ranking, municípios, comparativo entre anos */
-:root{
-  --bg:#f3f5f2; --card:#ffffff; --fg:#141a17; --mut:#5f6b65; --line:#dfe4e0; --acc:#1d4fb8; --ok:#1f7a4d; --warn:#b26b00;
-  --disp:"Archivo",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1311;--card:#171d1a;--fg:#e8ede9;--mut:#93a09a;--line:#28302c;--acc:#5b8cf0;--ok:#4cc38a;--warn:#e9a23b;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0f1311;--card:#171d1a;--fg:#e8ede9;--mut:#93a09a;--line:#28302c;--acc:#5b8cf0;--ok:#4cc38a;--warn:#e9a23b;color-scheme:dark}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
-.wrap{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
-.tnum{font-variant-numeric:tabular-nums}
-nav{display:flex;gap:6px;flex-wrap:wrap}
-nav a{font:600 13px var(--body);color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card)}
-nav a[aria-current]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
-h1{font:800 clamp(22px,5vw,32px)/1.05 var(--disp);font-stretch:85%;margin:0;letter-spacing:-.01em}
-section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
-.eyebrow{font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
-.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-label{display:grid;gap:4px;min-width:0;font:600 12px var(--body);color:var(--mut)}
-select,input{min-width:0;font:500 14px var(--body);background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%}
-select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-.kpi b{display:block;font:800 22px/1.1 var(--disp);font-stretch:90%}
-.kpi span{font-size:12px;color:var(--mut)}
-.tbl{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:6px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:7px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
-td.num,th.num{text-align:right}
-.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;min-width:80px}
-.bar i{display:block;height:100%;background:var(--acc)}
-.badge{font:700 10px var(--body);letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--ok);color:#fff}
-.badge.s{background:var(--line);color:var(--fg)}
-.note{font-size:12px;color:var(--mut);margin:0}
-.empty{padding:20px 0;color:var(--mut)}
-.more{margin-top:10px}
-button{font:600 13px var(--body);color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
-footer{font-size:12px;color:var(--mut)}
-footer a,.note a{color:inherit}
-.up{color:var(--ok)}.down{color:var(--warn)}
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&display=swap">
+<link rel="stylesheet" href="assets/app.css">
 </head>
 <body>
-<div class="wrap">
-  <header style="display:grid;gap:10px">
-    <nav><a href="./">Ao vivo</a><a href="./historico.html" aria-current="page">Histórico</a></nav>
-    <h1>Histórico eleitoral do Brasil</h1>
-    <p class="note">Resultados oficiais desde 2000, por estado e município, a partir dos Dados Abertos do TSE.</p>
-  </header>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="./"><span class="brand-key" aria-hidden="true">✓</span><b>Apuração</b></a>
+    <div class="live"><i class="dot off"></i><span id="upd">Histórico oficial do TSE</span></div>
+  </div>
+</header>
 
-  <section aria-label="Filtros">
-    <div class="filters">
-      <label for="fAno">Ano<select id="fAno"></select></label>
-      <label for="fTurno">Turno<select id="fTurno"></select></label>
-      <label for="fCargo">Cargo<select id="fCargo"></select></label>
-      <label for="fUf">Abrangência<select id="fUf"></select></label>
-      <label for="fMun" id="lMun" hidden>Município<select id="fMun"></select></label>
+<nav class="nav" aria-label="Seções">
+  <div class="nav-in">
+    <a href="./#presidente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h5"/><path d="m9 16 2 2 4-4"/></svg>Presidente</a>
+    <a href="./#estados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Estados</a>
+    <a href="./#governadores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>Governos</a>
+    <a href="historico.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Histórico</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page">
+    <div>
+      <h1 class="title">Histórico eleitoral</h1>
+      <p class="lead">Resultados oficiais desde 2000, por estado e município.</p>
     </div>
-  </section>
 
-  <div id="main"><section><p class="empty" id="msg">Carregando a lista de eleições…</p></section></div>
+    <div class="panel">
+      <div class="filters">
+        <label class="field" for="fAno">Ano<select id="fAno"></select></label>
+        <label class="field" for="fTurno">Turno<select id="fTurno"></select></label>
+        <label class="field" for="fCargo">Cargo<select id="fCargo"></select></label>
+        <label class="field" for="fUf">Onde<select id="fUf"></select></label>
+        <label class="field" for="fMun" id="lMun" hidden>Município<select id="fMun"></select></label>
+      </div>
+    </div>
 
-  <footer id="foot">Fonte: Portal de Dados Abertos do TSE (<a href="https://dadosabertos.tse.jus.br/" target="_blank" rel="noopener">dadosabertos.tse.jus.br</a>). Votos nominais válidos, somados por município a partir da votação por zona.</footer>
-</div>
+    <div id="main" class="page"><div class="panel"><div class="skel" style="height:120px"></div></div></div>
+
+    <footer class="foot">
+      <p>Fonte: Portal de Dados Abertos do TSE (<a href="https://dadosabertos.tse.jus.br/" target="_blank" rel="noopener">dadosabertos.tse.jus.br</a>). Votos nominais válidos, somados por município a partir da votação por zona. Presidente, governador, senador, prefeito e vereador aparecem por município; deputados, por estado.</p>
+    </footer>
+  </div>
+</main>
 
 <script>
 (()=>{
 const UFS={br:'Brasil',ac:'Acre',al:'Alagoas',am:'Amazonas',ap:'Amapá',ba:'Bahia',ce:'Ceará',df:'Distrito Federal',es:'Espírito Santo',go:'Goiás',ma:'Maranhão',mg:'Minas Gerais',ms:'Mato Grosso do Sul',mt:'Mato Grosso',pa:'Pará',pb:'Paraíba',pe:'Pernambuco',pi:'Piauí',pr:'Paraná',rj:'Rio de Janeiro',rn:'Rio Grande do Norte',ro:'Rondônia',rr:'Roraima',rs:'Rio Grande do Sul',sc:'Santa Catarina',se:'Sergipe',sp:'São Paulo',to:'Tocantins',zz:'Exterior'};
 const $=id=>document.getElementById(id);
 const fmt=x=>Math.round(x).toLocaleString('pt-BR');
-const pc=x=>(isFinite(x)?x:0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+const pc=x=>(isFinite(x)?x:0).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const title=s=>String(s).toLowerCase().replace(/(^|\s)(\S)/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(Da|De|Do|Dos|Das|E)\b/g,w=>w.toLowerCase());
 const cache={};
-async function getJ(p){if(!cache[p]){cache[p]=fetch(p).then(r=>{if(!r.ok)throw new Error('Arquivo '+p+' não encontrado');return r.json();});}return cache[p];}
+const getJ=p=>cache[p]||(cache[p]=fetch(p).then(r=>{if(!r.ok)throw new Error('não encontrei o arquivo '+p);return r.json();}));
 let IDX=null, DOC=null;
+const ORD=[1,3,5,6,7,8,11,13];
 
-function opts(sel,list,keep){const old=keep??sel.value;sel.innerHTML=list.map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('');if(list.some(([v])=>v===old))sel.value=old;}
-function eleito(s){return /^ELEITO|^ELEITO POR|M[EÉ]DIA/i.test(s||'');}
+function opts(sel,list){const old=sel.value;sel.innerHTML=list.map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('');if(list.some(([v])=>v===old))sel.value=old;}
+const eleito=s=>/^ELEITO|M[EÉ]DIA/i.test(s||'');
 
 function fillFilters(){
-  const anos=Object.keys(IDX.anos).sort().reverse();
-  opts($('fAno'),anos.map(a=>[a,a]));
+  opts($('fAno'),Object.keys(IDX.anos).sort().reverse().map(a=>[a,a]));
   const A=IDX.anos[$('fAno').value]||{};
   opts($('fTurno'),Object.keys(A).sort().map(t=>[t,t==='t1'?'1º turno':'2º turno']));
   const T=A[$('fTurno').value]||{};
-  const ord=[1,3,5,6,7,8,11,13];
-  opts($('fCargo'),Object.keys(T).sort((a,b)=>ord.indexOf(+a.slice(1))-ord.indexOf(+b.slice(1))).map(c=>[c,IDX.cargos[c.slice(1)]||c]));
+  opts($('fCargo'),Object.keys(T).sort((a,b)=>ORD.indexOf(+a.slice(1))-ORD.indexOf(+b.slice(1))).map(c=>[c,IDX.cargos[c.slice(1)]||c]));
   const ufs=(T[$('fCargo').value]||[]).slice().sort((a,b)=>a==='br'?-1:b==='br'?1:(UFS[a]||a).localeCompare(UFS[b]||b));
   opts($('fUf'),ufs.map(u=>[u,UFS[u]||u.toUpperCase()]));
 }
 
-function partyShare(doc,munCode){
+function partyShare(doc,mc){
   const t={};let tot=0;
-  if(munCode&&doc.mun&&doc.mun[munCode]){doc.mun[munCode].v.forEach(([i,v])=>{const p=doc.cands[i].p;t[p]=(t[p]||0)+v;tot+=v;});}
-  else doc.cands.forEach(c=>{if(munCode&&c.m&&c.m!==munCode)return;t[c.p]=(t[c.p]||0)+c.v;tot+=c.v;});
+  if(mc&&doc.mun&&doc.mun[mc]) doc.mun[mc].v.forEach(([i,v])=>{const p=doc.cands[i].p;t[p]=(t[p]||0)+v;tot+=v;});
+  else doc.cands.forEach(c=>{if(mc&&c.m&&c.m!==mc)return;t[c.p]=(t[c.p]||0)+c.v;tot+=c.v;});
   return {t,tot};
 }
 
 async function render(){
   const ano=$('fAno').value,tu=$('fTurno').value,ca=$('fCargo').value,uf=$('fUf').value;
   if(!ano||!tu||!ca||!uf)return;
-  $('main').innerHTML='<section><p class="empty">Carregando…</p></section>';
-  try{DOC=await getJ(`data/${ano}/${tu}/${ca}/${uf}.json`);}catch(e){$('main').innerHTML=`<section><p class="empty">${esc(e.message)}</p></section>`;return;}
-  const cargo=+ca.slice(1), municipal=cargo===11||cargo===13;
-  // municípios
-  const muns=DOC.mun?Object.entries(DOC.mun).map(([k,m])=>[k,m.nm]).sort((a,b)=>a[1].localeCompare(b[1])):[];
+  $('main').innerHTML='<div class="panel"><div class="skel" style="height:120px"></div></div>';
+  try{DOC=await getJ(`data/${ano}/${tu}/${ca}/${uf}.json`);}catch(e){$('main').innerHTML=`<div class="panel empty"><b>Resultado indisponível</b>${esc(e.message)}.</div>`;return;}
+  const municipal=DOC.cargo===11||DOC.cargo===13;
+  const muns=DOC.mun?Object.entries(DOC.mun).map(([k,m])=>[k,title(m.nm)]).sort((a,b)=>a[1].localeCompare(b[1])):[];
   $('lMun').hidden=!muns.length;
-  if(muns.length){const lst=(municipal?[]:[['','Todos os municípios']]).concat(muns);opts($('fMun'),lst);}
-  const mc=$('fMun').value&&muns.length?$('fMun').value:'';
-  renderDoc(mc,municipal);
+  if(muns.length) opts($('fMun'),(municipal?[]:[['','Todos os municípios']]).concat(muns));
+  renderDoc(muns.length?$('fMun').value:'');
 }
 
-function renderDoc(mc,municipal){
-  const d=DOC;
-  let cands, det;
-  if(mc&&d.mun[mc]){
-    const m=d.mun[mc];
-    cands=m.v.map(([i,v])=>({...d.cands[i],v})).sort((a,b)=>b.v-a.v);
-    det=m.det;
-  }else{cands=d.cands;det=d.det;}
-  const tv=cands.reduce((a,c)=>a+c.v,0)||1;
+function renderDoc(mc){
+  const d=DOC, municipal=d.cargo===11||d.cargo===13;
+  let cands,det;
+  if(mc&&d.mun?.[mc]){const m=d.mun[mc];cands=m.v.map(([i,v])=>({...d.cands[i],v})).sort((a,b)=>b.v-a.v);det=m.det;}
+  else{cands=d.cands;det=d.det;}
+  const tv=cands.reduce((a,c)=>a+c.v,0)||1, top=cands[0]?.v||1;
   const [aptos,comp,abst,br,nu]=det||[0,0,0,0,0];
-  const lugar=mc?d.mun[mc].nm:(UFS[d.uf]||d.uf);
-  const titulo=`${d.nm_cargo} · ${d.turno}º turno ${d.ano} · ${esc(lugar)}`;
-  const kpis=aptos?[
-    [fmt(aptos),'Eleitores aptos'],[pc(comp/aptos*100),'Comparecimento ('+fmt(comp)+')'],[pc(abst/aptos*100),'Abstenção ('+fmt(abst)+')'],
-    [fmt(tv),'Votos nominais válidos'],[pc(comp?br/comp*100:0),'Brancos ('+fmt(br)+')'],[pc(comp?nu/comp*100:0),'Nulos ('+fmt(nu)+')']
-  ]:[[fmt(tv),'Votos nominais válidos']];
-  const LIM=50;let shown=LIM;
-  const row=(c,i)=>`<tr><td class="num">${i+1}</td><td><b>${esc(c.nm)}</b> <span class="note">${esc(c.n)}</span></td><td>${esc(c.p)}</td><td class="num">${fmt(c.v)}</td><td class="num">${pc(c.v/tv*100)}</td><td><div class="bar"><i style="width:${(c.v/cands[0].v*100)||0}%"></i></div></td><td>${c.sit?`<span class="badge${eleito(c.sit)?'':' s'}">${esc(c.sit)}</span>`:''}</td></tr>`;
-  let html=`<section><p class="eyebrow">${titulo}</p><div class="kpis tnum">${kpis.map(([b,t])=>`<div class="kpi"><b>${b}</b><span>${t}</span></div>`).join('')}</div></section>
-  <section><p class="eyebrow">Candidatos (${fmt(cands.length)})</p><div class="tbl"><table class="tnum"><thead><tr><th class="num">#</th><th>Candidato</th><th>Partido</th><th class="num">Votos</th><th class="num">% válidos</th><th></th><th>Situação</th></tr></thead><tbody id="cBody">${cands.slice(0,LIM).map(row).join('')}</tbody></table></div>
-  ${cands.length>LIM?'<div class="more"><button type="button" id="btnMore">Mostrar mais 50</button></div>':''}</section>`;
-  // municípios (majoritários, visão geral)
-  if(d.mun&&!mc&&!municipal){
-    html+=`<section><p class="eyebrow">Por município</p><label for="busca">Buscar município<input id="busca" type="search" placeholder="Digite o nome"></label><div class="tbl" style="margin-top:10px"><table class="tnum"><thead><tr><th>Município</th><th>1º colocado</th><th class="num">%</th><th>2º colocado</th><th class="num">%</th><th class="num">Comparec.</th></tr></thead><tbody id="mBody"></tbody></table></div><p class="note" id="mNote"></p></section>`;
-  }
+  const lugar=mc?title(d.mun[mc].nm):(UFS[d.uf]||d.uf);
+  const stats=aptos?[[fmt(aptos),'eleitores aptos'],[pc(comp/aptos*100),'comparecimento'],[pc(abst/aptos*100),'abstenção'],[fmt(tv),'votos nominais válidos'],[pc(comp?br/comp*100:0),'brancos'],[pc(comp?nu/comp*100:0),'nulos']]:[[fmt(tv),'votos nominais válidos']];
+  const LIM=30;let shown=LIM;
+  const rk=(c,i)=>`<div class="rk tnum"><span class="pos">${i+1}</span><span class="nm">${esc(title(c.nm))} <small>${esc(c.p)}, ${esc(c.n)}</small>${c.sit?`<span class="tag${eleito(c.sit)?' win':''}">${esc(title(c.sit))}</span>`:''}</span><span class="v">${pc(c.v/tv*100)}<small>${fmt(c.v)}</small></span><span class="bar"><i style="width:${c.v/top*100}%"></i></span></div>`;
+  let h=`<div class="panel"><h2>${esc(d.nm_cargo)}, ${d.turno}º turno de ${d.ano}<small>${esc(lugar)}</small></h2><div class="stats tnum">${stats.map(([b,t])=>`<div class="stat"><b>${b}</b><span>${t}</span></div>`).join('')}</div></div>
+  <div class="cols"><div class="page">
+    <div class="panel"><h2>Candidatos<small>${fmt(cands.length)}</small></h2><div class="rank" id="rank">${cands.slice(0,LIM).map(rk).join('')}</div>${cands.length>LIM?'<button class="btn" type="button" id="more">Mostrar mais 30</button>':''}</div>`;
   if(d.ufs){
-    html+=`<section><p class="eyebrow">Por estado</p><div class="tbl"><table class="tnum"><thead><tr><th>UF</th><th>1º colocado</th><th class="num">%</th><th>2º colocado</th><th class="num">%</th><th class="num">Comparec.</th></tr></thead><tbody>${Object.entries(d.ufs).sort((a,b)=>(UFS[a[0]]||a[0]).localeCompare(UFS[b[0]]||b[0])).map(([u,x])=>{const s=x.v.slice().sort((a,b)=>b[1]-a[1]),t=s.reduce((a,v)=>a+v[1],0)||1;return `<tr><td><b>${u.toUpperCase()}</b> <span class="note">${esc(UFS[u]||'')}</span></td><td>${esc(d.cands[s[0]?.[0]]?.nm||'–')}</td><td class="num">${s[0]?pc(s[0][1]/t*100):'–'}</td><td>${esc(d.cands[s[1]?.[0]]?.nm||'–')}</td><td class="num">${s[1]?pc(s[1][1]/t*100):'–'}</td><td class="num">${x.det[0]?pc(x.det[1]/x.det[0]*100):'–'}</td></tr>`;}).join('')}</tbody></table></div></section>`;
+    h+=`<div class="panel"><h2>Por estado</h2><div class="rank">${Object.entries(d.ufs).sort((a,b)=>(UFS[a[0]]||'').localeCompare(UFS[b[0]]||'')).map(([u,x])=>{const s=x.v.slice().sort((a,b)=>b[1]-a[1]),t=s.reduce((a,v)=>a+v[1],0)||1;const w=d.cands[s[0]?.[0]];return `<div class="rk tnum"><span class="pos">${u.toUpperCase()}</span><span class="nm">${esc(UFS[u]||u)} <small>${w?esc(title(w.nm))+' venceu':''}</small></span><span class="v">${s[0]?pc(s[0][1]/t*100):'–'}<small>${x.det?.[0]?pc(x.det[1]/x.det[0]*100)+' compareceram':''}</small></span></div>`;}).join('')}</div></div>`;
   }
-  // comparativo por partido
+  h+=`</div><div class="page">`;
+  if(d.mun&&!mc&&!municipal){
+    h+=`<div class="panel"><h2>Por município</h2><label class="field" for="busca">Buscar<input id="busca" type="search" placeholder="Nome do município" autocomplete="off"></label><div class="rank" id="mlist" style="margin-top:6px"></div><p class="note" id="mnote" style="margin-top:8px"></p></div>`;
+  }
   const outros=Object.keys(IDX.anos).filter(a=>a!==String(d.ano)&&IDX.anos[a]?.['t'+d.turno]?.['c'+d.cargo]?.includes(d.uf)).sort().reverse();
-  html+=`<section><p class="eyebrow">Comparar partidos com outra eleição</p>${outros.length?`<label for="fCmp">Comparar ${d.ano} com<select id="fCmp">${outros.map(a=>`<option>${a}</option>`).join('')}</select></label><div id="cmp" style="margin-top:10px"></div>`:'<p class="note">Ainda não há outro ano com este cargo e abrangência para comparar.</p>'}</section>`;
-  html+=`<section><p class="eyebrow">Fonte deste resultado</p><p class="note">Arquivos oficiais do TSE: <a href="${esc(d.fonte.candidatos)}" rel="noopener">votação por candidato</a>${d.fonte.detalhe?` e <a href="${esc(d.fonte.detalhe)}" rel="noopener">detalhe da votação</a>`:''}. Processado em ${esc(d.fonte.gerado_em)}.</p></section>`;
-  $('main').innerHTML=html;
-  if($('btnMore'))$('btnMore').onclick=()=>{shown+=LIM;$('cBody').innerHTML=cands.slice(0,shown).map(row).join('');if(shown>=cands.length)$('btnMore').remove();};
-  if($('mBody')){
-    const rows=Object.entries(d.mun).map(([k,m])=>{const s=m.v.slice().sort((a,b)=>b[1]-a[1]),t=s.reduce((a,v)=>a+v[1],0)||1;return {k,nm:m.nm,a:s[0],b:s[1],t,det:m.det};}).sort((a,b)=>a.nm.localeCompare(b.nm));
-    const draw=q=>{const f=rows.filter(r=>!q||r.nm.toLowerCase().includes(q.toLowerCase()));$('mBody').innerHTML=f.slice(0,200).map(r=>`<tr><td><a href="#" data-m="${r.k}">${esc(r.nm)}</a></td><td>${esc(d.cands[r.a?.[0]]?.nm||'–')}</td><td class="num">${r.a?pc(r.a[1]/r.t*100):'–'}</td><td>${esc(d.cands[r.b?.[0]]?.nm||'–')}</td><td class="num">${r.b?pc(r.b[1]/r.t*100):'–'}</td><td class="num">${r.det[0]?pc(r.det[1]/r.det[0]*100):'–'}</td></tr>`).join('');$('mNote').textContent=f.length>200?`Mostrando 200 de ${fmt(f.length)}. Use a busca.`:`${fmt(f.length)} municípios.`;};
+  h+=`<div class="panel"><h2>Partidos contra outra eleição</h2>${outros.length?`<label class="field" for="fCmp">Comparar ${d.ano} com<select id="fCmp">${outros.map(a=>`<option>${a}</option>`).join('')}</select></label><div id="cmp" class="rank" style="margin-top:6px"></div><p class="note" style="margin-top:8px">Soma dos votos válidos por partido. Partidos mudam de nome e se fundem; compare siglas com cuidado.</p>`:'<p class="note">Ainda não há outro ano com este cargo e local para comparar.</p>'}</div>`;
+  h+=`<div class="panel"><h2>Fonte</h2><p class="note">Arquivos oficiais do TSE: <a href="${esc(d.fonte.candidatos)}" rel="noopener">votação por candidato</a>${d.fonte.detalhe?` e <a href="${esc(d.fonte.detalhe)}" rel="noopener">detalhe da votação</a>`:''}. Processados em ${esc(d.fonte.gerado_em)}.</p></div></div></div>`;
+  $('main').innerHTML=h;
+  if($('more'))$('more').onclick=()=>{shown+=LIM;$('rank').innerHTML=cands.slice(0,shown).map(rk).join('');if(shown>=cands.length)$('more').remove();};
+  if($('mlist')){
+    const rows=Object.entries(d.mun).map(([k,m])=>{const s=m.v.slice().sort((a,b)=>b[1]-a[1]),t=s.reduce((a,v)=>a+v[1],0)||1;return {k,nm:title(m.nm),w:d.cands[s[0]?.[0]],p:s[0]?s[0][1]/t*100:0};}).sort((a,b)=>a.nm.localeCompare(b.nm));
+    const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+    const draw=q=>{const f=rows.filter(r=>!q||norm(r.nm).includes(norm(q)));$('mlist').innerHTML=f.slice(0,40).map(r=>`<a class="rk tnum" href="#" data-m="${r.k}" style="text-decoration:none"><span class="pos">›</span><span class="nm">${esc(r.nm)} <small>${r.w?esc(title(r.w.nm)):''}</small></span><span class="v">${pc(r.p)}</span></a>`).join('');$('mnote').textContent=f.length>40?`Mostrando 40 de ${fmt(f.length)}. Digite para filtrar.`:`${fmt(f.length)} municípios.`;};
     draw('');$('busca').oninput=e=>draw(e.target.value);
-    $('mBody').onclick=e=>{const a=e.target.closest('a[data-m]');if(!a)return;e.preventDefault();$('fMun').value=a.dataset.m;renderDoc(a.dataset.m,false);window.scrollTo({top:0,behavior:'smooth'});};
+    $('mlist').onclick=e=>{const a=e.target.closest('[data-m]');if(!a)return;e.preventDefault();$('fMun').value=a.dataset.m;renderDoc(a.dataset.m);scrollTo({top:0,behavior:'smooth'});};
   }
   if($('fCmp')){const go=()=>compare(mc);$('fCmp').onchange=go;go();}
 }
 
 async function compare(mc){
   const d=DOC,b=$('fCmp').value;
-  $('cmp').innerHTML='<p class="note">Carregando…</p>';
+  $('cmp').innerHTML='<div class="skel" style="height:60px"></div>';
   let o;try{o=await getJ(`data/${b}/t${d.turno}/c${d.cargo}/${d.uf}.json`);}catch(e){$('cmp').innerHTML=`<p class="note">${esc(e.message)}</p>`;return;}
-  const A=partyShare(d,mc),B=partyShare(o,mc&&o.mun&&o.mun[mc]?mc:'');
-  const ps=[...new Set([...Object.keys(A.t),...Object.keys(B.t)])].map(p=>({p,a:(A.t[p]||0)/(A.tot||1)*100,b:(B.t[p]||0)/(B.tot||1)*100})).sort((x,y)=>Math.max(y.a,y.b)-Math.max(x.a,x.b)).slice(0,15);
-  const aviso=mc&&!(o.mun&&o.mun[mc])?'<p class="note">Este município não aparece no outro ano; a comparação usa a abrangência inteira.</p>':'';
-  $('cmp').innerHTML=`${aviso}<div class="tbl"><table class="tnum"><thead><tr><th>Partido</th><th class="num">${d.ano}</th><th class="num">${b}</th><th class="num">Variação</th></tr></thead><tbody>${ps.map(x=>{const dv=x.a-x.b;return `<tr><td><b>${esc(x.p)}</b></td><td class="num">${pc(x.a)}</td><td class="num">${pc(x.b)}</td><td class="num ${dv>=0?'up':'down'}">${dv>=0?'+':''}${dv.toFixed(2).replace('.',',')} pp</td></tr>`;}).join('')}</tbody></table></div><p class="note">% dos votos nominais válidos somados por partido. Partidos mudam de nome e se fundem entre eleições; compare siglas com cuidado.</p>`;
+  const A=partyShare(d,mc),B=partyShare(o,mc&&o.mun?.[mc]?mc:'');
+  const ps=[...new Set([...Object.keys(A.t),...Object.keys(B.t)])].map(p=>({p,a:(A.t[p]||0)/(A.tot||1)*100,b:(B.t[p]||0)/(B.tot||1)*100})).sort((x,y)=>Math.max(y.a,y.b)-Math.max(x.a,x.b)).slice(0,12);
+  $('cmp').innerHTML=ps.map(x=>{const dv=x.a-x.b;return `<div class="rk tnum"><span class="pos"></span><span class="nm">${esc(x.p)} <small>${pc(x.b)} em ${b}</small></span><span class="v">${pc(x.a)}<small class="${dv>=0?'up':'down'}">${dv>=0?'+':'−'}${Math.abs(dv).toFixed(1).replace('.',',')} pp</small></span></div>`;}).join('');
 }
 
 ['fAno','fTurno','fCargo','fUf'].forEach(id=>$(id).addEventListener('change',()=>{fillFilters();$('fMun').value='';render();}));
-$('fMun').addEventListener('change',()=>renderDoc($('fMun').value,(+$('fCargo').value.slice(1))>=11));
+$('fMun').addEventListener('change',()=>renderDoc($('fMun').value));
 
 getJ('data/index.json').then(ix=>{
-  IDX=ix;
-  if(!Object.keys(ix.anos||{}).length)throw new Error('vazio');
+  IDX=ix; if(!Object.keys(ix.anos||{}).length)throw 0;
+  if(ix.atualizado_em)$('upd').textContent='Dados do TSE de '+ix.atualizado_em.slice(0,10).split('-').reverse().join('/');
   fillFilters();
-  // padrão: presidente Brasil do ano mais recente, se existir
-  const a=$('fAno').value; if(ix.anos[a]?.t2?.c1){$('fTurno').value='t2';fillFilters();$('fCargo').value='c1';fillFilters();$('fUf').value='br';}
+  const a=$('fAno').value;
+  if(ix.anos[a]?.t2?.c1){$('fTurno').value='t2';fillFilters();$('fCargo').value='c1';fillFilters();$('fUf').value='br';}
   render();
-}).catch(()=>{$('main').innerHTML='<section><p class="empty">O histórico ainda está sendo montado. A rotina automática baixa os dados do TSE ano a ano; volte em algumas horas.</p></section>';});
+}).catch(()=>{$('main').innerHTML='<div class="panel empty"><b>O histórico está sendo montado</b>A rotina baixa os dados do TSE ano a ano. Os resultados aparecem aqui assim que o primeiro ano terminar.</div>';
+  ['fAno','fTurno','fCargo','fUf'].forEach(id=>$(id).disabled=true);});
 })();
 </script>
 </body>
