@@ -217,7 +217,7 @@ td{padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 .map path{stroke:var(--card);stroke-width:1.5;cursor:pointer;transition:opacity .2s}
 .map path:hover,.map path.sel{stroke:var(--ink);stroke-width:3}
 .map path:focus-visible{outline:none;stroke:var(--go);stroke-width:4}
-.map text{font:700 15px var(--body);fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:var(--card);stroke-width:3px}
+.map text{font:700 24px var(--body);fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:var(--card);stroke-width:3px}
 .mapinfo{min-height:44px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:8px;font-size:15px}
 .mapinfo .note{width:100%}
 .mapkey{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}

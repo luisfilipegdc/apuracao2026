@@ -273,7 +273,7 @@ function renderPres(d){
   const validRate=s.tv?s.vv/s.tv:0.95;
   const rem=s.esnt*turnout*validRate;
   if(s.final||s.pst>=100){$('proj').innerHTML=`<p class="swing">Apuração concluída. ${esc(ld.nm)} venceu por ${fmt(gap)} votos.</p>`;}
-  else if(s.pst<1){$('proj').innerHTML=`<p class="note">Com ${pc(s.pst)} das seções apuradas, a conta ainda não diz nada. Ela passa a valer depois de uns 5% apurados.</p>`;}
+  else if(s.pst<5){$('proj').innerHTML=`<p class="note">Com ${pc(s.pst)} das seções apuradas, a conta ainda não diz nada. Ela passa a valer depois de uns 5% apurados.</p>`;}
   else{
     const need=(rem+gap)/(2*rem)*100, poss=need<=100;
     const read=!poss?'Não dá mais para virar com os eleitores que faltam.':need>60?'Virada muito improvável no ritmo atual.':need>53?'Virada difícil, mas possível se as seções restantes forem de redutos de quem está atrás.':'Disputa aberta: a diferença cabe nos votos que faltam.';
