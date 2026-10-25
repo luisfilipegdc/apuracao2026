@@ -211,3 +211,26 @@ td{padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
 .seg{margin:0}
 .seg .chip{text-decoration:none;color:var(--ink)}
 .seg .chip[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* mapa e eleitorado */
+.map svg{width:100%;height:auto;display:block;max-height:420px}
+.map path{stroke:var(--card);stroke-width:1.5;cursor:pointer;transition:opacity .2s}
+.map path:hover,.map path.sel{stroke:var(--ink);stroke-width:3}
+.map path:focus-visible{outline:none;stroke:var(--go);stroke-width:4}
+.map text{font:700 15px var(--body);fill:var(--ink);pointer-events:none;paint-order:stroke;stroke:var(--card);stroke-width:3px}
+.mapinfo{min-height:44px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-top:8px;font-size:15px}
+.mapinfo .note{width:100%}
+.mapkey{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.mapkey i,.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:0}
+.stack{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--sunk)}
+.stack i{height:100%;min-width:2px}
+.legend{display:grid;gap:6px;margin-top:12px}
+.legend div{display:grid;grid-template-columns:auto 1fr auto 52px;gap:8px;align-items:baseline;font-size:14px}
+.legend b{font-weight:700}
+.legend small{color:var(--mut);text-align:right}
+.popbox{display:grid;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.popbox div{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline}
+.popbox b{font:800 26px/1 var(--disp);font-stretch:80%}
+.popbox span{font-size:13px;color:var(--mut)}
+@media (prefers-reduced-motion:no-preference){.flash{animation:flash 1.2s ease-out}}
+@keyframes flash{0%{box-shadow:0 0 0 3px var(--go)}100%{box-shadow:0 0 0 0 transparent}}

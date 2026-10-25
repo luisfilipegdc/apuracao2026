@@ -77,8 +77,13 @@
 
         <div class="page">
           <div class="panel">
-            <h2>Participação</h2>
-            <div class="stats tnum" id="kpis"></div>
+            <h2>Mapa por estado</h2>
+            <div class="map" id="map1"><div class="skel" style="height:260px"></div></div>
+          </div>
+          <div class="panel">
+            <h2>Como o eleitorado votou</h2>
+            <div id="elec"><div class="skel" style="height:60px"></div></div>
+            <div class="stats tnum" id="kpis" style="margin-top:14px"></div>
           </div>
           <div class="panel chart">
             <h2>Evolução na apuração</h2>
@@ -94,6 +99,7 @@
         <h1 class="title">Presidente por estado</h1>
         <p class="lead" id="ufWins">Toque num estado para ver 1º turno, 2022 e abstenção.</p>
       </div>
+      <div class="panel"><div class="map" id="map2"><div class="skel" style="height:260px"></div></div></div>
       <div class="chips" role="group" aria-label="Ordenar estados" id="chips">
         <button class="chip" type="button" data-s="te" aria-pressed="true">Maiores eleitorados</button>
         <button class="chip" type="button" data-s="marg" aria-pressed="false">Mais apertados</button>
@@ -114,7 +120,7 @@
     </section>
 
     <footer class="foot">
-      <p>Fonte: arquivos oficiais de divulgação do TSE em <a href="https://resultados.tse.jus.br/oficial/app/index.html" target="_blank" rel="noopener">resultados.tse.jus.br</a> (eleições 6258, 6260 e 6257). Números parciais até a totalização final. Atualiza sozinho a cada 30 segundos.</p>
+      <p>Fonte: arquivos oficiais de divulgação do TSE em <a href="https://resultados.tse.jus.br/oficial/app/index.html" target="_blank" rel="noopener">resultados.tse.jus.br</a> (eleições 6258, 6260 e 6257). Números parciais até a totalização final. Confere o TSE a cada 5 segundos e baixa só o que mudou. População: Censo Demográfico 2022, IBGE. Limites estaduais: IBGE, simplificados.</p>
       <p>2º turno de 2022 por estado: calculado dos <a href="https://dadosabertos.tse.jus.br/" target="_blank" rel="noopener">Dados Abertos do TSE</a> (votação por partido, município e zona).</p>
     </footer>
   </div>
@@ -129,7 +135,9 @@ const FED='6258', EST='6260', T1E='6257';
 const pad=e=>String(e).padStart(6,'0');
 const UFS={ac:'Acre',al:'Alagoas',am:'Amazonas',ap:'Amapá',ba:'Bahia',ce:'Ceará',df:'Distrito Federal',es:'Espírito Santo',go:'Goiás',ma:'Maranhão',mg:'Minas Gerais',ms:'Mato Grosso do Sul',mt:'Mato Grosso',pa:'Pará',pb:'Paraíba',pe:'Pernambuco',pi:'Piauí',pr:'Paraná',rj:'Rio de Janeiro',rn:'Rio Grande do Norte',ro:'Rondônia',rr:'Roraima',rs:'Rio Grande do Sul',sc:'Santa Catarina',se:'Sergipe',sp:'São Paulo',to:'Tocantins',zz:'Exterior'};
 const GOV_FALLBACK=['ac','am','df','es','rn','to'];
-const INTERVAL=30, STALE_MIN=10;
+const INTERVAL=5, STALE_MIN=10;
+// População residente, Censo Demográfico 2022 (IBGE).
+const POP={valor:203080756, fonte:'Censo 2022, IBGE'};
 // 2º turno 2022, % do PT (13) sobre PT+PL. Fonte: TSE Dados Abertos, votacao_partido_munzona_2022 (turno 2, cargo Presidente).
 const R22={br:{a:50.90,b:49.10,pc:79.41},ac:29.70,al:58.68,am:51.10,ap:48.64,ba:72.12,ce:69.97,df:41.19,es:41.96,go:41.29,ma:71.14,mg:50.20,ms:40.51,mt:34.92,pa:54.75,pb:66.62,pe:66.93,pi:76.86,pr:37.60,rj:43.47,rn:65.10,ro:29.34,rr:23.92,rs:43.65,sc:30.73,se:67.21,sp:44.76,to:51.36,zz:51.28};
 const T1={}; let T1BR=null;
@@ -166,7 +174,7 @@ async function get(path,tries=4){
     await slot(); let r;
     const url=(viaProxy?BASE:DIRECT)+path;
     try{r=await fetch(url,{cache:'no-cache'});}catch(e){r=null;}finally{release();}
-    if(!r||(viaProxy&&r.status>=500)){if(viaProxy){viaProxy=false;continue;}await sleep(2000*2**i);continue;}
+    if(!r||(viaProxy&&!r.ok&&r.status!==429)){if(viaProxy){viaProxy=false;continue;}await sleep(2000*2**i);continue;}
     if(r.status===429||r.status>=500){await sleep(2000*2**i+Math.random()*800);continue;}
     if(!r.ok) throw new Error('o TSE respondeu '+r.status);
     return r.json();
@@ -194,6 +202,45 @@ const saveHist=()=>{try{localStorage.setItem('apur26_hist',JSON.stringify(hist.s
 function fileTime(s){const [d,m,y]=(s.dg||'').split('/');const [h,mi,se]=(s.hg||'0:0:0').split(':');return new Date(+y,+m-1,+d,+h,+mi,+se);}
 
 let PRES=null;
+function renderElec(s,A,B){
+  const te=s.te||1, apurado=te-s.esnt;
+  const parts=[
+    ['Votos em '+A.nm,A.vap,'var(--a)'],['Votos em '+B.nm,B.vap,'var(--b)'],
+    ['Brancos',s.vb,'var(--mut)'],['Nulos',s.vn,'var(--ink)'],['Abstenção',s.a,'var(--alert)'],
+    ['Seções ainda não apuradas',s.esnt,'var(--sunk)']];
+  $('elec').innerHTML=`<p class="note tnum" style="margin-bottom:8px">Os ${fmt(te)} eleitores aptos, divididos pelo que já foi apurado.</p>
+    <div class="stack" role="img" aria-label="Divisão do eleitorado">${parts.map(([l,v,c])=>v>0?`<i style="width:${v/te*100}%;background:${c}" title="${esc(l)}"></i>`:'').join('')}</div>
+    <div class="legend tnum">${parts.map(([l,v,c])=>`<div><i style="background:${c}"></i><span>${esc(l)}</span><b>${fmt(v)}</b><small>${pc1(v/te*100)}</small></div>`).join('')}</div>
+    <div class="popbox tnum"><div><b>${pc1(te/POP.valor*100)}</b><span>da população é eleitor apto: ${fmt(te)} de ${fmt(POP.valor)} pessoas (${POP.fonte}).</span></div>
+    ${s.c?`<div><b>${pc1(s.c/(apurado||1)*100)}</b><span>dos eleitores das seções já apuradas foram votar.</span></div>`:''}</div>`;
+}
+
+let MAP=null, mapSel=null;
+fetch('assets/br-ufs.json').then(r=>r.json()).then(m=>{MAP=m;renderMaps();}).catch(()=>{});
+function ufColor(r){
+  if(!r)return 'var(--sunk)';
+  const t=r.a.vap+r.b.vap; if(!t)return 'var(--sunk)';
+  const m=Math.abs(r.a.vap-r.b.vap)/t*100; const k=Math.min(1,.25+m/30);
+  return `color-mix(in srgb,${r.a.vap>=r.b.vap?'var(--a)':'var(--b)'} ${Math.round(k*100)}%,var(--card))`;
+}
+function renderMaps(){
+  if(!MAP)return;
+  const by=Object.fromEntries(ufRows.map(r=>[r.uf,r]));
+  ['map1','map2'].forEach(id=>{
+    const el=$(id); if(!el)return;
+    const paths=Object.entries(MAP.ufs).map(([uf,d])=>`<path d="${d}" data-uf="${uf}" fill="${ufColor(by[uf])}" class="${mapSel===uf?'sel':''}" tabindex="0" role="button" aria-label="${esc(UFS[uf])}"></path>`).join('');
+    const labels=Object.entries(MAP.c).map(([uf,[x,y]])=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle">${uf.toUpperCase()}</text>`).join('');
+    const r=mapSel&&by[mapSel];
+    el.innerHTML=`<svg viewBox="0 0 ${MAP.w} ${MAP.h}" aria-label="Mapa do Brasil por estado">${paths}${labels}</svg>
+      <div class="mapinfo tnum">${r?`<b>${esc(r.nm)}</b> <span style="color:var(--a)">${pc1(r.a.pvap)}</span> × <span style="color:var(--b)">${pc1(r.b.pvap)}</span><span class="note">${pc1(r.pst)} apurado. <a href="#estados" data-open="${r.uf}">Ver detalhes</a></span>`:'<span class="note">Toque num estado. Cor mais forte, vitória mais folgada.</span>'}</div>
+      <div class="mapkey note"><span><i style="background:var(--a)"></i>${esc(PRES?.A?.nm||'')}</span><span><i style="background:var(--b)"></i>${esc(PRES?.B?.nm||'')}</span><span><i style="background:var(--sunk)"></i>Sem votos</span></div>`;
+  });
+}
+document.addEventListener('click',e=>{
+  const p=e.target.closest('.map path'); if(p){mapSel=p.dataset.uf;renderMaps();return;}
+  const o=e.target.closest('[data-open]'); if(o){setTimeout(()=>{const d=document.querySelector(`details.uf[data-uf="${o.dataset.open}"]`);if(d){d.open=true;d.scrollIntoView({block:'center'});}},50);}
+});
+document.addEventListener('keydown',e=>{const p=e.target.closest?.('.map path');if(p&&(e.key==='Enter'||e.key===' ')){e.preventDefault();mapSel=p.dataset.uf;renderMaps();}});
 function renderPres(d){
   const cs=ordered(cands(d)), s=summary(d); const [A,B]=cs; PRES={A,B,s};
   $('score').innerHTML=cs.map((c,i)=>`<div class="cand" style="--c:${COL[i]}">
@@ -209,15 +256,16 @@ function renderPres(d){
   $('hg').textContent='Arquivo do TSE: '+(s.dg||'')+' '+(s.hg||'');
   $('kpis').innerHTML=[
     [pc(s.pc),'comparecimento'],[pc(s.pa),'abstenção'],[fmt(s.vv),'votos válidos'],
-    [pc(s.pvb),'brancos'],[pc(s.pvn),'nulos'],[fmt(s.esnt),'eleitores em seções ainda não apuradas']
+    [pc(s.pvb),'brancos (dos votos)'],[pc(s.pvn),'nulos (dos votos)'],[fmt(s.c),'eleitores que votaram']
   ].map(([b,t])=>`<div class="stat"><b>${b}</b><span>${t}</span></div>`).join('');
 
+  renderElec(s,A,B);
   // aviso quando o TSE para de publicar
   const age=(Date.now()-fileTime(s).getTime())/60000;
   const stale=!s.final&&s.pst<100&&age>STALE_MIN;
   $('stale').hidden=!stale;
   if(stale){$('staleT').textContent='Sem números novos do TSE desde '+(s.hg||'').slice(0,5);
-    $('staleD').textContent=' O último arquivo publicado tem '+pc(s.pst)+' das seções. O painel confere de novo a cada 30 segundos e atualiza sozinho quando sair o próximo.';}
+    $('staleD').textContent=' O último arquivo publicado tem '+pc(s.pst)+' das seções. O painel confere a cada 5 segundos e atualiza sozinho quando sair o próximo.';}
 
   // virada
   const trail=lead>=0?B:A, ti=lead>=0?1:0, gap=Math.abs(lead);
@@ -286,16 +334,17 @@ function renderCmp(){
 }
 
 let ufRows=[], sortKey='te';
-async function loadUfs(){
-  const ufs=Object.keys(UFS);
+async function loadUfs(only){
+  const ufs=only||Object.keys(UFS);
   const res=await Promise.allSettled(ufs.map(u=>get(`/${FED}/dados/${u}/${u}-c0001-e${pad(FED)}-u.json`)));
-  const prev=Object.fromEntries(ufRows.map(r=>[r.uf,r]));
-  ufRows=res.map((r,i)=>{
-    if(r.status!=='fulfilled') return prev[ufs[i]]||null;
+  const byUf=Object.fromEntries(ufRows.map(r=>[r.uf,r]));
+  res.forEach((r,i)=>{
+    if(r.status!=='fulfilled')return;
     const d=r.value,cs=ordered(cands(d)),s=summary(d);
-    return {uf:ufs[i],nm:UFS[ufs[i]],te:s.te,pst:s.pst,pa:s.pa,a:cs[0],b:cs[1]};
-  }).filter(Boolean);
-  renderUfs();
+    byUf[ufs[i]]={uf:ufs[i],nm:UFS[ufs[i]],te:s.te,pst:s.pst,pa:s.pa,a:cs[0],b:cs[1]};
+  });
+  ufRows=Object.values(byUf);
+  renderUfs(); renderMaps();
 }
 function renderUfs(){
   if(!ufRows.length)return;
@@ -332,10 +381,14 @@ $('chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)
   document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));renderUfs();});
 
 let govUfs=null, govDone=false;
-async function loadGovs(){
+let govDocs={};
+async function loadGovs(only){
   if(!govUfs){try{const ab=await get(`/${EST}/dados/br/br-e${pad(EST)}-ab.json`);govUfs=ab.abr.filter(a=>a.tpabr==='uf').map(a=>a.cdabr);}catch(e){govUfs=GOV_FALLBACK;}}
   govDone=true;
-  const res=await Promise.allSettled(govUfs.map(u=>get(`/${EST}/dados/${u}/${u}-c0003-e${pad(EST)}-u.json`)));
+  const want=only?govUfs.filter(u=>only.includes(u)):govUfs;
+  const got=await Promise.allSettled(want.map(u=>get(`/${EST}/dados/${u}/${u}-c0003-e${pad(EST)}-u.json`)));
+  got.forEach((r,i)=>{govDocs[want[i]]=r.status==='fulfilled'?r:(govDocs[want[i]]||r);});
+  const res=govUfs.map(u=>govDocs[u]||{status:'rejected'});
   $('govs').innerHTML=res.map((r,i)=>{
     const u=govUfs[i];
     if(r.status!=='fulfilled') return `<article class="gov"><header><h3>${esc(UFS[u]||u.toUpperCase())}</h3></header><p class="note">Sem números do TSE ainda.</p></article>`;
@@ -348,24 +401,47 @@ async function loadGovs(){
   }).join('');
 }
 
-/* ciclo de atualização */
-let left=INTERVAL,busy=false,nCycle=0;
+/* ciclo de atualização: confere o TSE a cada 5 s e só baixa o que mudou */
+let left=INTERVAL,busy=false,lastIdg=null,stamps={fed:{},est:{}},first=true,newAt=null;
+const stampOf=a=>`${a.s?.st}|${a.ht}|${a.dt}`;
+async function changed(ele,key){
+  const ab=await get(`/${ele}/dados/br/br-e${pad(ele)}-ab.json`);
+  const out=[];
+  ab.abr.filter(a=>a.tpabr==='uf').forEach(a=>{const k=stampOf(a);if(stamps[key][a.cdabr]!==k){stamps[key][a.cdabr]=k;out.push(a.cdabr);}});
+  return out;
+}
+let partsBusy=false;
+async function refreshParts(){
+  if(partsBusy)return; partsBusy=true;
+  try{
+    const [ufs,govs]=await Promise.all([changed(FED,'fed').catch(()=>null),changed(EST,'est').catch(()=>null)]);
+    const all=!ufRows.length;
+    await Promise.all([
+      (all||ufs===null)?loadUfs():(ufs.length?loadUfs(ufs):null),
+      (!govDone||govs===null)?loadGovs():(govs.length?loadGovs(govs):null)
+    ]);
+  }finally{partsBusy=false;}
+}
 async function cycle(){
-  if(busy)return; busy=true; $('stTxt').textContent='Atualizando';
+  if(busy)return; busy=true;
+  const hh=t=>t.toLocaleTimeString('pt-BR');
   try{
     const d=await get(`/${FED}/dados/br/br-c0001-e${pad(FED)}-u.json`);
-    renderPres(d);
-    if(nCycle%2===0||!ufRows.length) await loadUfs();
-    if(nCycle%2===1||!govDone) await loadGovs();
-    nCycle++;
+    if(d.idg!==lastIdg){
+      lastIdg=d.idg; renderPres(d);
+      if(!first){newAt=new Date();const sc=document.querySelector('#score')?.closest('.panel');if(sc){sc.classList.remove('flash');void sc.offsetWidth;sc.classList.add('flash');}}
+      first=false;
+      refreshParts();
+    }
     $('dot').className='dot '+($('stale').hidden?'on':'wait');
-    $('stTxt').textContent='Ao vivo, conferido às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    $('stTxt').textContent=(newAt?'Números novos às '+hh(newAt):'TSE: arquivo das '+(PRES?.s?.hg||''))+', conferido às '+hh(new Date()).slice(0,5);
   }catch(e){
     $('dot').className='dot wait';
     $('stTxt').textContent='Sem resposta: '+e.message;
   }finally{busy=false;left=INTERVAL;}
 }
 setInterval(()=>{left--;$('cd').textContent=left>0&&!busy?left+'s':'';if(left<=0)cycle();},1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)cycle();});
 $('btnNow').onclick=cycle;
 cycle();
 loadT1();
