@@ -166,20 +166,21 @@ const slot=()=>new Promise(r=>{Q.push(r);pump();});
 function pump(){while(active<MAXC&&Q.length){active++;Q.shift()();}}
 function release(){setTimeout(()=>{active--;pump();},GAP);}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-// Primeiro pelo atalho do próprio site (/tse, com cache na Vercel); se falhar, direto no TSE.
-const DIRECT=BASE.replace('/tse/','https://resultados.tse.jus.br/oficial/');
-let viaProxy=true;
-async function get(path,tries=4){
+// Duas rotas para o mesmo arquivo do TSE: o atalho do site (/tse, com cache na Vercel) e o TSE direto,
+// a partir do aparelho de quem está vendo. Se uma rota recebe 429 ou falha, fica de molho e a outra assume.
+const ROUTES=[{base:BASE,wait:0},{base:BASE.replace('/tse/','https://resultados.tse.jus.br/oficial/'),wait:0}];
+function pickRoute(){const now=Date.now();return ROUTES.find(r=>r.wait<=now)||ROUTES.slice().sort((x,y)=>x.wait-y.wait)[0];}
+async function get(path,tries=6){
   for(let i=0;i<tries;i++){
-    await slot(); let r;
-    const url=(viaProxy?BASE:DIRECT)+path;
-    try{r=await fetch(url,{cache:'no-cache'});}catch(e){r=null;}finally{release();}
-    if(!r||(viaProxy&&!r.ok&&r.status!==429)){if(viaProxy){viaProxy=false;continue;}await sleep(2000*2**i);continue;}
-    if(r.status===429||r.status>=500){await sleep(2000*2**i+Math.random()*800);continue;}
-    if(!r.ok) throw new Error('o TSE respondeu '+r.status);
-    return r.json();
+    const rt=pickRoute();
+    if(rt.wait>Date.now()) await sleep(Math.min(rt.wait-Date.now(),4000));
+    await slot(); let r=null;
+    try{r=await fetch(rt.base+path,{cache:'no-cache'});}catch(e){r=null;}finally{release();}
+    if(r&&r.ok) return r.json();
+    if(r&&r.status===404) throw new Error('arquivo ainda não publicado pelo TSE');
+    rt.wait=Date.now()+(r&&r.status===429?60000:15000);
   }
-  throw new Error('o TSE limitou as consultas');
+  throw new Error('o TSE pediu para consultar mais devagar');
 }
 function slim(d){return {s:d.s,e:d.e,v:d.v,dg:d.dg,hg:d.hg,and:d.and,tf:d.tf,carg:[{agr:(d.carg?.[0]?.agr||[]).map(a=>({par:a.par.map(p=>({sg:p.sg,cand:p.cand.map(k=>({n:k.n,nm:k.nm,nmu:k.nmu,vap:k.vap,pvap:k.pvap,e:k.e,st:k.st,seq:k.seq}))}))}))}]};}
 function cands(d){
@@ -437,7 +438,7 @@ async function cycle(){
     $('stTxt').textContent=(newAt?'Números novos às '+hh(newAt):'TSE: arquivo das '+(PRES?.s?.hg||''))+', conferido às '+hh(new Date()).slice(0,5);
   }catch(e){
     $('dot').className='dot wait';
-    $('stTxt').textContent='Sem resposta: '+e.message;
+    $('stTxt').textContent=(PRES?'Mostrando o arquivo das '+(PRES.s.hg||'').slice(0,5)+'. ':'')+'Tentando de novo: '+e.message;
   }finally{busy=false;left=INTERVAL;}
 }
 setInterval(()=>{left--;$('cd').textContent=left>0&&!busy?left+'s':'';if(left<=0)cycle();},1000);
